@@ -315,23 +315,28 @@ router.post('/orders', authenticateToken, async (req, res) => {
     const finalTax = tax || (finalSubtotal * 0.16);
     const finalTotal = total || (finalSubtotal + finalShippingCost + finalTax);
 
+    // Build shipping/billing addresses safely with defaults
+    const shippingAddress = {
+      street: user.address?.street || 'N/A',
+      city: user.address?.city || 'Nairobi',
+      state: user.address?.state || 'Nairobi',
+      postalCode: user.address?.postalCode || '00100',
+      country: user.address?.country || 'Kenya'
+    };
+
+    const billingAddress = {
+      street: user.address?.street || 'N/A',
+      city: user.address?.city || 'Nairobi',
+      state: user.address?.state || 'Nairobi',
+      postalCode: user.address?.postalCode || '00100',
+      country: user.address?.country || 'Kenya'
+    };
+
     // Create order
     const order = new Order({
       customer,
-      shippingAddress: customer.address ? {
-        street: customer.address,
-        city: customer.city,
-        state: customer.state || 'Nairobi',
-        postalCode: customer.postalCode || '00100',
-        country: customer.country || 'Kenya'
-      } : null,
-      billingAddress: customer.address ? {
-        street: customer.address,
-        city: customer.city,
-        state: customer.state || 'Nairobi',
-        postalCode: customer.postalCode || '00100',
-        country: customer.country || 'Kenya'
-      } : null,
+      shippingAddress,
+      billingAddress,
       items: processedOrderItems,
       subtotal: finalSubtotal,
       shippingCost: finalShippingCost,
@@ -350,9 +355,6 @@ router.post('/orders', authenticateToken, async (req, res) => {
         $inc: { stock: -item.quantity }
       });
     }
-
-    // Clear user's cart after successful order
-    await user.clearCart();
 
     // Add order to user's order history
     user.orders.push(order._id);

@@ -10,7 +10,46 @@ import UserProfile from './UserProfile';
 // CFK Africa style navigation structure
 const navLinks = [
   { label: 'Home', to: '/' },
-  { label: 'Our Programs', to: '/our-programs' },
+  {
+    label: 'Our Programs',
+    dropdown: [
+      { 
+        label: 'The Rebirth Susan Village', 
+        to: '/programs/susan-village',
+        blurb: '24/7 rescue, shelter, and reintegration services for survivors.',
+        cta: 'Explore Susan Village',
+        image: 'https://res.cloudinary.com/samokello/image/upload/v1720000000/rebirth/programs/susan_village.jpg'
+      },
+      { 
+        label: 'The Rebirth Elimisha Program', 
+        to: '/programs/elimisha',
+        blurb: 'Scholarships, mentorship, and apprenticeships for education access.',
+        cta: 'Explore Elimisha',
+        image: 'https://res.cloudinary.com/samokello/image/upload/v1720000000/rebirth/programs/elimisha.jpg'
+      },
+      { 
+        label: 'Raising Authentic Voices', 
+        to: '/programs/authentic-voices',
+        blurb: 'Advocacy on menstrual health, GBV prevention, and anti-trafficking.',
+        cta: 'Explore Authentic Voices',
+        image: 'https://res.cloudinary.com/samokello/image/upload/v1720000000/rebirth/programs/authentic_voices.jpg'
+      },
+      { 
+        label: 'Vocational Training Program', 
+        to: '/programs/vocational-training',
+        blurb: 'Technical skills, employability, and on-the-job training.',
+        cta: 'Explore Training',
+        image: 'https://res.cloudinary.com/samokello/image/upload/v1720000000/rebirth/programs/vocational.jpg'
+      },
+      { 
+        label: 'Volunteer Program', 
+        to: '/programs/volunteer',
+        blurb: 'Join our global village to support survivors and communities.',
+        cta: 'Explore Volunteering',
+        image: 'https://res.cloudinary.com/samokello/image/upload/v1720000000/rebirth/programs/volunteer.jpg'
+      },
+    ],
+  },
   { label: 'Shop', to: '/shop', icon: <FaShoppingCart /> },
   {
     label: 'Our Impact',
@@ -442,8 +481,8 @@ const DropdownMenu = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 6px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  padding: 8px 0;
-  min-width: 200px;
+  padding: 16px;
+  min-width: 280px;
   z-index: 4000;
   margin-top: 0;
   opacity: ${props => props.$open ? 1 : 0};
@@ -453,9 +492,11 @@ const DropdownMenu = styled.div`
 
   @media (max-width: 768px) {
     left: 0;
-    min-width: 180px;
+    min-width: 260px;
   }
 `;
+
+// Mega menu components removed to keep dropdowns simple
 
 const DropdownItem = styled(Link)`
   display: block;
@@ -463,6 +504,7 @@ const DropdownItem = styled(Link)`
   color: #333;
   text-decoration: none;
   font-size: 14px;
+  border-radius: 8px;
   transition: background-color 0.2s, color 0.2s;
 
   &:hover {
@@ -481,6 +523,9 @@ const DropdownItem = styled(Link)`
     padding: 8px 14px;
   }
 `;
+
+// Mega menu components removed
+// Note: Mega* components kept for potential future mega menus; currently unused in simple list.
 
 const NavActions = styled.div`
   display: flex;
@@ -530,26 +575,6 @@ const DonateButton = styled(Link)`
   }
 `;
 
-const ContactButton = styled(Link)`
-  background: transparent;
-  color: #333;
-  text-decoration: none;
-  padding: 10px 20px;
-  border: 1px solid #333;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #333;
-    color: white;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
 
 const LoginButton = styled(Link)`
   background: #667eea;

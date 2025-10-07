@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { 
   FaTrash, 
@@ -11,18 +12,730 @@ import {
   FaShieldAlt,
   FaCreditCard,
   FaUndo,
-  FaCheck
+  FaCheck,
+  FaHeart
 } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_MAIN } from '../api';
+import styled, { keyframes } from 'styled-components';
+
+// Animations
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const slideIn = keyframes`
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const pulse = keyframes`
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+`;
+
+// Styled Components
+const Container = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+`;
+
+const Header = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+`;
+
+const HeaderContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const BackButton = styled.button`
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateX(-2px);
+  }
+`;
+
+const HeaderTitle = styled.h1`
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
+const FeatureBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+`;
+
+const ClearButton = styled.button`
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+  }
+`;
+
+const MainContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+`;
+
+const Breadcrumb = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0;
+  font-size: 14px;
+  color: #666;
+`;
+
+const BreadcrumbLink = styled(Link)`
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CartSection = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const CartItem = styled.div`
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 20px;
+  padding: 20px;
+  border: 2px solid #f8f9fa;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  animation: ${fadeIn} 0.5s ease-out;
+  
+  &:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+`;
+
+const ProductImage = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f9fa;
+  position: relative;
+`;
+
+const Image = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
+
+const ProductDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const ProductName = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+`;
+
+const ProductCategory = styled.p`
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const ProductPrice = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 15px;
+`;
+
+const QuantityControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const QuantityLabel = styled.span`
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+`;
+
+const QuantityWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+`;
+
+const QuantityButton = styled.button`
+  padding: 8px 12px;
+  border: none;
+  background: ${props => props.disabled ? '#f8f9fa' : 'white'};
+  color: ${props => props.disabled ? '#bdc3c7' : '#2c3e50'};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+  }
+`;
+
+const QuantityDisplay = styled.span`
+  padding: 8px 16px;
+  border-left: 1px solid #e1e8ed;
+  border-right: 1px solid #e1e8ed;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+  background: #f8f9fa;
+`;
+
+const ItemActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+`;
+
+const ItemTotal = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 15px;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const ActionButton = styled.button`
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  
+  &.remove {
+    background: #e74c3c;
+    color: white;
+    
+    &:hover {
+      background: #c0392b;
+      transform: scale(1.1);
+    }
+  }
+  
+  &.favorite {
+    background: #f39c12;
+    color: white;
+    
+    &:hover {
+      background: #e67e22;
+      transform: scale(1.1);
+    }
+  }
+`;
+
+const SummarySection = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  height: fit-content;
+  position: sticky;
+  top: 120px;
+`;
+
+const PriceBreakdown = styled.div`
+  margin-bottom: 25px;
+`;
+
+const PriceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f3f4;
+  
+  &.total {
+    border-top: 2px solid #e1e8ed;
+    margin-top: 15px;
+    font-weight: 700;
+    font-size: 18px;
+  }
+`;
+
+const PriceLabel = styled.span`
+  font-size: 16px;
+  color: #666;
+`;
+
+const PriceValue = styled.span`
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  
+  &.free {
+    color: #27ae60;
+    font-weight: 700;
+  }
+  
+  &.total {
+    font-size: 20px;
+    color: #667eea;
+  }
+`;
+
+const FreeDeliveryBanner = styled.div`
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin: 10px 0;
+`;
+
+const PaymentSection = styled.div`
+  margin-bottom: 20px;
+`;
+
+const PaymentTitle = styled.div`
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 12px;
+`;
+
+const PaymentMethods = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+`;
+
+const PaymentMethod = styled.button`
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid ${props => props.selected ? '#27ae60' : '#e1e8ed'};
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #667eea;
+  }
+`;
+
+const PhoneInput = styled.input`
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid #e1e8ed;
+  font-size: 14px;
+  margin-top: 10px;
+  transition: border-color 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const CheckoutButton = styled.button`
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+  }
+  
+  &:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+  }
+`;
+
+const SecurityFeatures = styled.div`
+  border-top: 1px solid #e1e8ed;
+  padding-top: 20px;
+`;
+
+const SecurityTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+`;
+
+const SecurityGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+`;
+
+const SecurityFeature = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #666;
+`;
+
+const RelatedSection = styled.div`
+  margin-top: 40px;
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+`;
+
+const RelatedTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 20px;
+`;
+
+const RelatedGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+`;
+
+const RelatedProduct = styled.div`
+  border: 1px solid #e1e8ed;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  }
+`;
+
+const RelatedImage = styled.div`
+  width: 100%;
+  height: 140px;
+  background: #f8f9fa;
+  overflow: hidden;
+`;
+
+const RelatedInfo = styled.div`
+  padding: 15px;
+`;
+
+const RelatedCategory = styled.div`
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+`;
+
+const RelatedName = styled.h3`
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+`;
+
+const RelatedPrice = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: #667eea;
+`;
+
+const AddButton = styled.button`
+  padding: 8px 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #5a6fd8;
+    transform: scale(1.05);
+  }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 40px 20px;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: ${pulse} 2s infinite;
+`;
+
+const EmptyTitle = styled.h2`
+  font-size: 28px;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  font-weight: 600;
+`;
+
+const EmptyText = styled.p`
+  font-size: 16px;
+  color: #7f8c8d;
+  margin-bottom: 30px;
+  line-height: 1.5;
+`;
+
+const EmptyActions = styled.div`
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+const EmptyButton = styled.button`
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &.primary {
+    background: #667eea;
+    color: white;
+    border: none;
+    
+    &:hover {
+      background: #5a6fd8;
+      transform: translateY(-2px);
+    }
+  }
+  
+  &.secondary {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    
+    &:hover {
+      background: #667eea;
+      color: white;
+    }
+  }
+`;
+
+const Notification = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #27ae60;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  animation: ${slideIn} 0.3s ease-out;
+`;
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, clearCart, addToCart } = useCart();
+  const { addToFavorites } = useFavorites();
   const { isAuthenticated } = useAuth();
   const [isCheckingOut] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('paystack');
+  const [mpesaPhone, setMpesaPhone] = useState('');
   const navigate = useNavigate();
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplying, setPromoApplying] = useState(false);
+  const [promoDiscount, setPromoDiscount] = useState(0); // absolute amount in KSH
+  const [savedForLater, setSavedForLater] = useState([]);
+
+  // Saved for later storage helpers (per-user/guest)
+  const savedKey = 'saved_for_later';
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(savedKey);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setSavedForLater(arr);
+      }
+    } catch (_) {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem(savedKey, JSON.stringify(savedForLater)); } catch (_) {}
+  }, [savedForLater]);
+
+  const handleSaveForLater = (item) => {
+    if (!item || !item.product) return;
+    setSavedForLater((prev) => {
+      const exists = prev.find((s) => (s.product?._id || s.product) === (item.product?._id || item.product));
+      if (exists) return prev;
+      return [...prev, { product: item.product, quantity: item.quantity || 1 }];
+    });
+    removeFromCart(item.product?._id || item.id);
+    setNotification({ show: true, message: 'Saved for later' });
+    setTimeout(() => setNotification({ show: false, message: '' }), 2000);
+  };
+
+  const handleMoveSavedToCart = (saved) => {
+    if (!saved || !saved.product || !saved.product._id) return;
+    addToCart(saved.product, saved.quantity || 1);
+    setSavedForLater((prev) => prev.filter((s) => (s.product?._id || s.product) !== (saved.product?._id || saved.product)));
+    setNotification({ show: true, message: 'Moved to cart' });
+    setTimeout(() => setNotification({ show: false, message: '' }), 2000);
+  };
+
+  const handleMoveToFavorites = async (item) => {
+    try {
+      if (!item || !item.product) return;
+      await addToFavorites(item.product);
+      removeFromCart(item.product?._id || item.id);
+      setNotification({ show: true, message: 'Moved to favorites' });
+      setTimeout(() => setNotification({ show: false, message: '' }), 2000);
+    } catch (_) {}
+  };
 
   const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity >= 1) {
@@ -31,11 +744,11 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    if (isAuthenticated) {
-      navigate('/checkout');
-    } else {
+    if (!isAuthenticated) {
       navigate('/login', { state: { returnUrl: '/checkout' } });
+      return;
     }
+    navigate('/checkout');
   };
 
   const calculateSubtotal = () => {
@@ -48,14 +761,53 @@ const Cart = () => {
 
   const calculateDelivery = () => {
     const subtotal = calculateSubtotal();
-    return subtotal >= 2000 ? 0 : 200; // Free delivery over KSH 2000
+    return subtotal >= 2000 ? 0 : 200;
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateDelivery();
+    const totalBeforePromo = calculateSubtotal() + calculateDelivery();
+    const discount = Math.min(promoDiscount, totalBeforePromo);
+    return totalBeforePromo - discount;
   };
 
-  // Load related products based on cart categories
+  const applyPromo = async () => {
+    const code = (promoCode || '').trim();
+    if (!code) return;
+    try {
+      setPromoApplying(true);
+      // Try server validation first
+      try {
+        const { data } = await API_MAIN.post('/shop/promo/validate', { code, subtotal: calculateSubtotal() });
+        if (data?.success && typeof data.data?.discountAmount === 'number') {
+          setPromoDiscount(Math.max(0, Number(data.data.discountAmount)));
+          setNotification({ show: true, message: `Promo applied: -KSH ${Number(data.data.discountAmount).toFixed(0)}` });
+          setTimeout(() => setNotification({ show: false, message: '' }), 2500);
+          return;
+        }
+      } catch (_) {
+        // fall through to client known codes
+      }
+
+      // Client-side known codes as fallback
+      const codeUpper = code.toUpperCase();
+      const subtotal = calculateSubtotal();
+      if (codeUpper === 'WELCOME10') {
+        setPromoDiscount(Math.floor(subtotal * 0.1));
+        setNotification({ show: true, message: 'WELCOME10 applied: 10% off' });
+      } else if (codeUpper === 'FREESHIP') {
+        // emulate free shipping (up to delivery cost)
+        setPromoDiscount(calculateDelivery());
+        setNotification({ show: true, message: 'Free shipping applied' });
+      } else {
+        setPromoDiscount(0);
+        setNotification({ show: true, message: 'Invalid promo code' });
+      }
+      setTimeout(() => setNotification({ show: false, message: '' }), 2000);
+    } finally {
+      setPromoApplying(false);
+    }
+  };
+
   useEffect(() => {
     const fetchRelated = async () => {
       try {
@@ -104,726 +856,359 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-        {/* Top Navigation Bar */}
-        <div style={{
-          backgroundColor: "#2c3e50",
-          color: "white",
-          padding: "12px 0",
-          position: "sticky",
-          top: 0,
-          zIndex: 1000,
-          boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
-        }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <button
-                onClick={() => navigate('/shop')}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "white",
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  padding: "8px"
-                }}
-              >
+      <Container>
+        <Header>
+          <HeaderContent>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <BackButton onClick={() => navigate('/shop')}>
                 <FaArrowLeft />
-              </button>
-              <h1 style={{ margin: 0, fontSize: "20px", fontWeight: "600" }}>Shopping Cart</h1>
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          padding: '40px 20px',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '60px 40px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-            maxWidth: '500px',
-            width: '100%'
-          }}>
-            <div style={{ fontSize: '80px', marginBottom: '20px' }}>🛒</div>
-            <h2 style={{ 
-              fontSize: '28px', 
-              color: '#2c3e50', 
-              marginBottom: '16px',
-              fontWeight: '600'
-            }}>
-              Your cart is empty
-            </h2>
-            <p style={{ 
-              fontSize: '16px', 
-              color: '#7f8c8d', 
-              marginBottom: '30px',
-              lineHeight: '1.5'
-            }}>
-              Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
-            </p>
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => navigate('/shop')}
-                style={{
-                  padding: '15px 30px',
-                  backgroundColor: '#3498db',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
-              >
+                Back to Shop
+              </BackButton>
+              <HeaderTitle>
                 <FaShoppingBag />
-                Start Shopping
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                style={{
-                  padding: '15px 30px',
-                  backgroundColor: 'transparent',
-                  color: '#3498db',
-                  border: '2px solid #3498db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#3498db';
-                  e.target.style.color = 'white';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = '#3498db';
-                }}
-              >
-                Back to Home
-              </button>
+                Shopping Cart
+              </HeaderTitle>
             </div>
-          </div>
-        </div>
-      </div>
+          </HeaderContent>
+        </Header>
+
+        <EmptyState>
+          <EmptyIcon>🛒</EmptyIcon>
+          <EmptyTitle>Your cart is empty</EmptyTitle>
+          <EmptyText>
+            Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
+          </EmptyText>
+          <EmptyActions>
+            <EmptyButton className="primary" onClick={() => navigate('/shop')}>
+              <FaShoppingBag />
+              Start Shopping
+            </EmptyButton>
+            <EmptyButton className="secondary" onClick={() => navigate('/')}>
+              Back to Home
+            </EmptyButton>
+          </EmptyActions>
+        </EmptyState>
+      </Container>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      {/* Notification */}
+    <Container>
       {notification.show && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          backgroundColor: '#27ae60',
-          color: 'white',
-          padding: '12px 20px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 1000
-        }}>
+        <Notification>
           {notification.message}
-        </div>
+        </Notification>
       )}
-      {/* Top Navigation Bar */}
-      <div style={{
-        backgroundColor: "#2c3e50",
-        color: "white",
-        padding: "12px 0",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            <button
-              onClick={() => navigate('/shop')}
-              style={{
-                background: "none",
-                border: "none",
-                color: "white",
-                fontSize: "20px",
-                cursor: "pointer",
-                padding: "8px"
-              }}
-            >
+      
+      <Header>
+        <HeaderContent>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <BackButton onClick={() => navigate('/shop')}>
               <FaArrowLeft />
-            </button>
-            <h1 style={{ margin: 0, fontSize: "20px", fontWeight: "600" }}>
+              Back to Shop
+            </BackButton>
+            <HeaderTitle>
+              <FaShoppingBag />
               Shopping Cart ({items.length} {items.length === 1 ? 'item' : 'items'})
-            </h1>
+            </HeaderTitle>
           </div>
           
-          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}>
-              <FaTruck style={{ color: "#3498db" }} />
-              <span>Free Delivery</span>
-            </div>
-            <button
-              onClick={clearCart}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#c0392b'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#e74c3c'}
-            >
+          <HeaderActions>
+            <FeatureBadge>
+              <FaTruck />
+              Free Delivery
+            </FeatureBadge>
+            <ClearButton onClick={clearCart}>
               Clear Cart
-            </button>
-          </div>
-        </div>
-      </div>
+            </ClearButton>
+          </HeaderActions>
+        </HeaderContent>
+      </Header>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-        {/* Breadcrumb */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "20px 0",
-          fontSize: "14px",
-          color: "#666"
-        }}>
-          <Link to="/" style={{ color: "#3498db", textDecoration: "none" }}>Home</Link>
+      <MainContent>
+        <Breadcrumb>
+          <BreadcrumbLink to="/">Home</BreadcrumbLink>
           <span>/</span>
-          <Link to="/shop" style={{ color: "#3498db", textDecoration: "none" }}>Shop</Link>
+          <BreadcrumbLink to="/shop">Shop</BreadcrumbLink>
           <span>/</span>
-          <span style={{ color: "#2c3e50" }}>Shopping Cart</span>
-        </div>
+          <span style={{ color: '#2c3e50' }}>Shopping Cart</span>
+        </Breadcrumb>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
-          {/* Cart Items */}
-          <div style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
-            padding: "20px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-          }}>
-            <h2 style={{
-              fontSize: "20px",
-              fontWeight: "600",
-              color: "#2c3e50",
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px"
-            }}>
+        <Grid>
+          <CartSection>
+            <SectionTitle>
               <FaShoppingBag />
               Cart Items
-            </h2>
+            </SectionTitle>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr auto",
-                    gap: "12px",
-                    padding: "12px",
-                    border: "1px solid #e1e8ed",
-                    borderRadius: "12px",
-                    backgroundColor: "#fafbfc",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#3498db";
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(52, 152, 219, 0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#e1e8ed";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  {/* Product Image */}
-                  <div style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    backgroundColor: "#f8f9fa"
-                  }}>
+                <CartItem key={item.id}>
+                  <ProductImage>
                     {item.product?.images && item.product.images[0] ? (
-                      <img
+                      <Image
                         src={item.product.images[0].url}
                         alt={item.product.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover"
-                        }}
                       />
                     ) : (
                       <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "100%",
-                        height: "100%",
-                        color: "#aaa",
-                        fontSize: "12px"
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                        color: '#aaa',
+                        fontSize: '12px'
                       }}>
                         No Image
                       </div>
                     )}
-                  </div>
+                  </ProductImage>
 
-                  {/* Product Details */}
-                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <ProductDetails>
                     <div>
-                      <h3 style={{
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        color: "#2c3e50",
-                        margin: "0 0 8px 0",
-                        lineHeight: "1.3"
-                      }}>
-                        {item.product?.name || 'Unknown Product'}
-                      </h3>
-                      <p style={{
-                        fontSize: "12px",
-                        color: "#666",
-                        margin: "0 0 10px 0"
-                      }}>
-                        {item.product?.category?.replace('-', ' ') || 'Uncategorized'}
-                      </p>
-                      <div style={{
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#3498db"
-                      }}>
-                        KSH {(item.product?.price || 0).toFixed(0)}
-                      </div>
+                      <ProductName>{item.product?.name || 'Unknown Product'}</ProductName>
+                      <ProductCategory>{item.product?.category?.replace('-', ' ') || 'Uncategorized'}</ProductCategory>
+                      <ProductPrice>KSH {(item.product?.price || 0).toFixed(0)}</ProductPrice>
                     </div>
 
-                    {/* Quantity Controls */}
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginTop: "10px"
-                    }}>
-                      <span style={{ fontSize: "12px", fontWeight: "600", color: "#2c3e50" }}>Qty:</span>
-                      <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        border: "1px solid #ddd",
-                        borderRadius: "6px",
-                        overflow: "hidden"
-                      }}>
-                        <button
+                    <QuantityControls>
+                      <QuantityLabel>Qty:</QuantityLabel>
+                      <QuantityWrapper>
+                        <QuantityButton
                           onClick={() => handleQuantityChange(item.product?._id || item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          style={{
-                            padding: "6px 10px",
-                            border: "none",
-                            backgroundColor: item.quantity <= 1 ? "#f8f9fa" : "white",
-                            color: item.quantity <= 1 ? "#bdc3c7" : "#2c3e50",
-                            cursor: item.quantity <= 1 ? "not-allowed" : "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                          }}
                         >
                           <FaMinus />
-                        </button>
-                        <span style={{
-                          padding: "6px 12px",
-                          borderLeft: "1px solid #ddd",
-                          borderRight: "1px solid #ddd",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          minWidth: "40px",
-                          textAlign: "center"
-                        }}>
-                          {item.quantity}
-                        </span>
-                        <button
+                        </QuantityButton>
+                        <QuantityDisplay>{item.quantity}</QuantityDisplay>
+                        <QuantityButton
                           onClick={() => handleQuantityChange(item.product?._id || item.id, item.quantity + 1)}
-                          style={{
-                            padding: "6px 10px",
-                            border: "none",
-                            backgroundColor: "white",
-                            color: "#2c3e50",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                          }}
                         >
                           <FaPlus />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                        </QuantityButton>
+                      </QuantityWrapper>
+                    </QuantityControls>
+                  </ProductDetails>
 
-                  {/* Actions */}
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    justifyContent: "space-between"
-                  }}>
-                    <div style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color: "#2c3e50",
-                      marginBottom: "8px"
-                    }}>
+                  <ItemActions>
+                    <ItemTotal>
                       KSH {((item.product?.price || 0) * (item.quantity || 0)).toFixed(0)}
-                    </div>
+                    </ItemTotal>
                     
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
+                    <ActionButtons>
+                      <ActionButton
+                        className="favorite"
+                        onClick={() => handleMoveToFavorites(item)}
+                        title="Move to favorites"
+                      >
+                        <FaHeart />
+                      </ActionButton>
+                      <ActionButton
+                        onClick={() => handleSaveForLater(item)}
+                        title="Save for later"
+                        style={{ background: '#95a5a6', color: 'white' }}
+                      >
+                        Save
+                      </ActionButton>
+                      <ActionButton
+                        className="remove"
                         onClick={() => {
                           removeFromCart(item.product?._id || item.id);
                           setNotification({ show: true, message: 'Item removed from cart' });
                           setTimeout(() => setNotification({ show: false, message: '' }), 2000);
                         }}
-                        style={{
-                          padding: "6px",
-                          border: "none",
-                          backgroundColor: "#e74c3c",
-                          color: "white",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          transition: "all 0.2s ease"
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = "#c0392b"}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = "#e74c3c"}
                         title="Remove item"
                       >
                         <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                      </ActionButton>
+                    </ActionButtons>
+                  </ItemActions>
+                </CartItem>
               ))}
             </div>
-          </div>
+          </CartSection>
 
-          {/* Order Summary */}
-          <div style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
-            padding: "20px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-            height: "fit-content",
-            position: "sticky",
-            top: "100px"
-          }}>
-            <h2 style={{
-              fontSize: "20px",
-              fontWeight: "600",
-              color: "#2c3e50",
-              marginBottom: "16px"
-            }}>
-              Order Summary
-            </h2>
+          <SummarySection>
+            <SectionTitle>Order Summary</SectionTitle>
 
-            {/* Price Breakdown */}
-            <div style={{ marginBottom: "25px" }}>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 0",
-                borderBottom: "1px solid #f1f3f4"
-              }}>
-                <span style={{ fontSize: "16px", color: "#666" }}>Subtotal ({items.length} items)</span>
-                <span style={{ fontSize: "16px", fontWeight: "600", color: "#2c3e50" }}>
-                  KSH {calculateSubtotal().toFixed(0)}
-                </span>
-              </div>
+            <PriceBreakdown>
+              <PriceRow>
+                <PriceLabel>Subtotal ({items.length} items)</PriceLabel>
+                <PriceValue>KSH {calculateSubtotal().toFixed(0)}</PriceValue>
+              </PriceRow>
               
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 0",
-                borderBottom: "1px solid #f1f3f4"
-              }}>
-                <span style={{ fontSize: "16px", color: "#666" }}>Delivery</span>
-                <span style={{ 
-                  fontSize: "16px", 
-                  fontWeight: "600", 
-                  color: calculateDelivery() === 0 ? "#27ae60" : "#2c3e50"
-                }}>
-                  {calculateDelivery() === 0 ? "FREE" : `KSH ${calculateDelivery()}`}
-                </span>
-              </div>
+              <PriceRow>
+                <PriceLabel>Delivery</PriceLabel>
+                <PriceValue className={calculateDelivery() === 0 ? 'free' : ''}>
+                  {calculateDelivery() === 0 ? 'FREE' : `KSH ${calculateDelivery()}`}
+                </PriceValue>
+              </PriceRow>
 
               {calculateDelivery() > 0 && (
-                <div style={{
-                  fontSize: "12px",
-                  color: "#666",
-                  textAlign: "center",
-                  padding: "8px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "6px",
-                  margin: "10px 0"
-                }}>
+                <FreeDeliveryBanner>
                   Add KSH {(2000 - calculateSubtotal()).toFixed(0)} more for free delivery
-                </div>
+                </FreeDeliveryBanner>
               )}
 
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 0",
-                borderTop: "2px solid #e1e8ed",
-                marginTop: "10px"
-              }}>
-                <span style={{ fontSize: "16px", fontWeight: "600", color: "#2c3e50" }}>Total</span>
-                <span style={{ fontSize: "20px", fontWeight: "bold", color: "#3498db" }}>
-                  KSH {calculateTotal().toFixed(0)}
-                </span>
-              </div>
-            </div>
+              <PriceRow className="total">
+                <PriceLabel>Total</PriceLabel>
+                <PriceValue className="total">KSH {calculateTotal().toFixed(0)}</PriceValue>
+              </PriceRow>
+            </PriceBreakdown>
 
-            {/* Checkout Button */}
+        {/* Promo Code */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 14, color: '#2c3e50', fontWeight: 600, marginBottom: 8 }}>Promo Code</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="Enter promo code (e.g., WELCOME10)"
+              style={{ flex: 1, padding: '10px 12px', border: '1px solid #e1e8ed', borderRadius: 8, fontSize: 14 }}
+            />
             <button
+              onClick={applyPromo}
+              disabled={promoApplying}
+              style={{ padding: '10px 12px', borderRadius: 8, background: '#667eea', color: 'white', border: 'none', fontWeight: 600, cursor: promoApplying ? 'not-allowed' : 'pointer' }}
+            >
+              {promoApplying ? 'Applying...' : 'Apply'}
+            </button>
+          </div>
+          {promoDiscount > 0 && (
+            <div style={{ marginTop: 8, fontSize: 13, color: '#27ae60', fontWeight: 600 }}>
+              Promo discount: -KSH {promoDiscount.toFixed(0)}
+            </div>
+          )}
+        </div>
+
+            <PaymentSection>
+              <PaymentTitle>Payment Method</PaymentTitle>
+              <PaymentMethods>
+                <PaymentMethod
+                  selected={paymentMethod === 'paystack'}
+                  onClick={() => setPaymentMethod('paystack')}
+                >
+                  Paystack
+                </PaymentMethod>
+                <PaymentMethod
+                  selected={paymentMethod === 'mpesa'}
+                  onClick={() => setPaymentMethod('mpesa')}
+                >
+                  M-Pesa
+                </PaymentMethod>
+              </PaymentMethods>
+              {paymentMethod === 'mpesa' && (
+                <PhoneInput
+                  type="tel"
+                  placeholder="M-Pesa phone (07XXXXXXXX)"
+                  value={mpesaPhone}
+                  onChange={(e) => setMpesaPhone(e.target.value)}
+                />
+              )}
+            </PaymentSection>
+
+            <CheckoutButton
               onClick={handleCheckout}
               disabled={isCheckingOut}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                backgroundColor: isCheckingOut ? "#bdc3c7" : "#27ae60",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: isCheckingOut ? "not-allowed" : "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "6px",
-                marginBottom: "16px"
-              }}
-              onMouseEnter={(e) => {
-                if (!isCheckingOut) e.target.style.backgroundColor = "#229954";
-              }}
-              onMouseLeave={(e) => {
-                if (!isCheckingOut) e.target.style.backgroundColor = "#27ae60";
-              }}
             >
               <FaCheck />
               {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
-            </button>
+            </CheckoutButton>
 
-            {/* Security Features */}
-            <div style={{
-              borderTop: "1px solid #e1e8ed",
-              paddingTop: "20px"
-            }}>
-              <h3 style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: "#2c3e50",
-                marginBottom: "15px"
-              }}>
-                Secure Checkout
-              </h3>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-                gap: "10px"
-              }}>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  color: "#666"
-                }}>
-                  <FaShieldAlt style={{ color: "#3498db" }} />
+            <SecurityFeatures>
+              <SecurityTitle>Secure Checkout</SecurityTitle>
+              <SecurityGrid>
+                <SecurityFeature>
+                  <FaShieldAlt style={{ color: '#667eea' }} />
                   <span>SSL Secure</span>
-                </div>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  color: "#666"
-                }}>
-                  <FaCreditCard style={{ color: "#3498db" }} />
+                </SecurityFeature>
+                <SecurityFeature>
+                  <FaCreditCard style={{ color: '#667eea' }} />
                   <span>Safe Payment</span>
-                </div>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  color: "#666"
-                }}>
-                  <FaUndo style={{ color: "#3498db" }} />
+                </SecurityFeature>
+                <SecurityFeature>
+                  <FaUndo style={{ color: '#667eea' }} />
                   <span>Easy Returns</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                </SecurityFeature>
+              </SecurityGrid>
+            </SecurityFeatures>
+          </SummarySection>
+        </Grid>
 
-      {/* You May Also Like */}
-      {relatedProducts.length > 0 && (
-        <div style={{ maxWidth: '1200px', margin: '20px auto 40px', padding: '0 20px' }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '20px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#2c3e50',
-              marginBottom: '16px'
-            }}>
-              You May Also Like
-            </h2>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '12px'
-            }}>
+        {/* Saved For Later */}
+        {savedForLater.length > 0 && (
+          <RelatedSection>
+            <RelatedTitle>Saved For Later</RelatedTitle>
+            <RelatedGrid>
+              {savedForLater.map((s, idx) => (
+                <RelatedProduct key={(s.product?._id) || idx}>
+                  <RelatedImage>
+                    {s.product?.images?.[0]?.url ? (
+                      <img src={s.product.images[0].url} alt={s.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#aaa', fontSize: '14px' }}>No Image</div>
+                    )}
+                  </RelatedImage>
+                  <RelatedInfo>
+                    <RelatedCategory>{s.product?.category?.replace('-', ' ')}</RelatedCategory>
+                    <RelatedName>{s.product?.name}</RelatedName>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <RelatedPrice>KSH {Number(s.product?.price || 0).toFixed(0)}</RelatedPrice>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <AddButton onClick={() => handleMoveSavedToCart(s)}>Move to Cart</AddButton>
+                        <AddButton style={{ background: '#e74c3c' }} onClick={() => setSavedForLater(prev => prev.filter(p => (p.product?._id || p.product) !== (s.product?._id || s.product)))}>Remove</AddButton>
+                      </div>
+                    </div>
+                  </RelatedInfo>
+                </RelatedProduct>
+              ))}
+            </RelatedGrid>
+          </RelatedSection>
+        )}
+
+        {relatedProducts.length > 0 && (
+          <RelatedSection>
+            <RelatedTitle>You May Also Like</RelatedTitle>
+            <RelatedGrid>
               {relatedProducts.map((p) => (
-                <div
+                <RelatedProduct
                   key={p._id}
                   onClick={() => navigate(`/product/${p._id}`)}
-                  style={{
-                    border: '1px solid #e1e8ed',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    backgroundColor: 'white',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
-                  }}
                 >
-                  <div style={{ width: '100%', height: '140px', backgroundColor: '#f8f9fa', overflow: 'hidden' }}>
+                  <RelatedImage>
                     {p.images?.[0]?.url ? (
                       <img src={p.images[0].url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#aaa', fontSize: '14px' }}>No Image</div>
                     )}
-                  </div>
-                  <div style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-                      {p.category?.replace('-', ' ')}
-                    </div>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#2c3e50', margin: '0 0 6px 0', lineHeight: '1.3' }}>
-                      {p.name}
-                    </h3>
+                  </RelatedImage>
+                  <RelatedInfo>
+                    <RelatedCategory>{p.category?.replace('-', ' ')}</RelatedCategory>
+                    <RelatedName>{p.name}</RelatedName>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#3498db' }}>KSH {Number(p.price || 0).toFixed(0)}</div>
-                      <button
+                      <RelatedPrice>KSH {Number(p.price || 0).toFixed(0)}</RelatedPrice>
+                      <AddButton
                         onClick={(e) => { e.stopPropagation(); addToCart(p, 1); setNotification({ show: true, message: `${p.name} added to cart` }); setTimeout(() => setNotification({ show: false, message: '' }), 2000); }}
-                        style={{
-                          padding: '8px 10px',
-                          backgroundColor: '#3498db',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2980b9'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3498db'}
                       >
                         Add
-                      </button>
+                      </AddButton>
                     </div>
-                  </div>
-                </div>
+                  </RelatedInfo>
+                </RelatedProduct>
               ))}
-            </div>
-          </div>
-        </div>
-      )}
+            </RelatedGrid>
+          </RelatedSection>
+        )}
 
-        {/* Continue Shopping */}
-        <div style={{
-          marginTop: "30px",
-          textAlign: "center"
-        }}>
-          <button
-            onClick={() => navigate('/shop')}
-            style={{
-              padding: "12px 24px",
-              backgroundColor: "transparent",
-              color: "#3498db",
-              border: "2px solid #3498db",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px"
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = "#3498db";
-              e.target.style.color = "white";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = "transparent";
-              e.target.style.color = "#3498db";
-            }}
-          >
+        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+          <EmptyButton className="secondary" onClick={() => navigate('/shop')}>
             <FaShoppingBag />
             Continue Shopping
-          </button>
+          </EmptyButton>
         </div>
-      </div>
-    </div>
+      </MainContent>
+    </Container>
   );
 };
 

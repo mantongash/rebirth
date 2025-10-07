@@ -7,6 +7,84 @@ class SMSService {
     this.baseUrl = 'https://api.africastalking.com/version1/messaging';
   }
 
+  // Send order receipt SMS to buyer
+  async sendOrderReceiptSMS(order) {
+    try {
+      const phone = order?.customer?.phone;
+      if (!phone) {
+        console.log('No phone number on order for SMS');
+        return { success: false, error: 'No phone number provided' };
+      }
+
+      let formattedPhone = phone.replace(/^\+/, '');
+      if (!formattedPhone.startsWith('254')) {
+        formattedPhone = '254' + formattedPhone.replace(/^0/, '');
+      }
+
+      const message = `Order ${order.orderNumber || order._id} confirmed. Total: ${order.currency} ${order.total}. Thank you for shopping with Rebirth of a Queen!`;
+
+      const payload = {
+        username: process.env.AT_USERNAME,
+        to: formattedPhone,
+        message: message,
+        from: this.senderId
+      };
+
+      const response = await axios.post(this.baseUrl, payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'apiKey': this.apiKey
+        }
+      });
+
+      console.log('Order receipt SMS sent successfully:', response.data);
+      return { success: true, messageId: response.data.SMSMessageData?.Recipients?.[0]?.messageId };
+
+    } catch (error) {
+      console.error('Error sending order receipt SMS:', error.response?.data || error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send admin notification SMS for paid order
+  async sendOrderPaidAdminSMS(order) {
+    try {
+      const adminPhone = process.env.ADMIN_PHONE;
+      if (!adminPhone) {
+        console.log('No admin phone configured for order notification');
+        return { success: false, error: 'No admin phone configured' };
+      }
+
+      let formattedPhone = adminPhone.replace(/^\+/, '');
+      if (!formattedPhone.startsWith('254')) {
+        formattedPhone = '254' + formattedPhone.replace(/^0/, '');
+      }
+
+      const itemsCount = (order.items || []).reduce((n, i) => n + (i.quantity || 0), 0);
+      const message = `New paid order ${order.orderNumber || order._id}: ${itemsCount} items, Total ${order.currency} ${order.total}. Buyer: ${order.customer?.firstName} ${order.customer?.lastName}.`;
+
+      const payload = {
+        username: process.env.AT_USERNAME,
+        to: formattedPhone,
+        message: message,
+        from: this.senderId
+      };
+
+      const response = await axios.post(this.baseUrl, payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'apiKey': this.apiKey
+        }
+      });
+
+      console.log('Order admin SMS sent successfully:', response.data);
+      return { success: true, messageId: response.data.SMSMessageData?.Recipients?.[0]?.messageId };
+
+    } catch (error) {
+      console.error('Error sending admin order SMS:', error.response?.data || error.message);
+      return { success: false, error: error.message };
+    }
+  }
   // Send thank you SMS to donor
   async sendDonationThankYouSMS(donation) {
     try {

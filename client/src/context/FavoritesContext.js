@@ -11,8 +11,26 @@ const getGuestFavoritesStorageKey = () => 'favorites_guest';
 
 const isFavoritesDataExpired = (timestamp) => {
   const now = Date.now();
-  const twentyDaysInMs = 20 * 24 * 60 * 60 * 1000; // 20 days in milliseconds
-  return (now - timestamp) > twentyDaysInMs;
+  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds (like major e-commerce sites)
+  return (now - timestamp) > thirtyDaysInMs;
+};
+
+// Persisted clear flag helpers (prevents future re-sync)
+const getFavoritesClearedFlagFromLocal = (key) => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const expired = (Date.now() - parsed.timestamp) > sevenDaysInMs;
+    if (expired) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed;
+  } catch (_) {
+    return null;
+  }
 };
 
 const saveFavoritesToLocalStorage = (userId, favoritesData) => {
@@ -116,25 +134,37 @@ export const FavoritesProvider = ({ children }) => {
   useEffect(() => {
     const loadFavorites = async () => {
       const userId = user?._id;
+      const clearedFlag = sessionStorage.getItem('favorites_cleared');
       
-      if (isAuthenticated && userId) {
-        // Merge any guest favorites into server
-        const guestFavs = loadFavoritesFromLocalStorage(null);
-        if (guestFavs && guestFavs.length > 0) {
-          try {
-            for (const pf of guestFavs) {
-              if (pf?._id) {
-                await API_MAIN.post('/auth/favorites/add', { productId: pf._id });
-              }
-            }
-            clearUserFavoritesFromStorage(null);
-            showSuccess('Synced your favorites', { duration: 3000 });
-          } catch (_) {
-            // best-effort merge
+      // Check if user cleared favorites (with timestamp check - expires after 7 days)
+      if (clearedFlag) {
+        try {
+          const clearData = JSON.parse(clearedFlag);
+          const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+          const isExpired = (Date.now() - clearData.timestamp) > sevenDaysInMs;
+          const isCurrentUser = clearData.userId === (userId || 'guest');
+          
+          if (clearData.cleared && !isExpired && isCurrentUser) {
+            dispatch({ type: 'LOAD_FAVORITES', payload: [] });
+            clearUserFavoritesFromStorage(userId);
+            // Don't sync from server if user explicitly cleared
+            return;
+          } else if (isExpired) {
+            // Clear expired flag
+            sessionStorage.removeItem('favorites_cleared');
+          }
+        } catch (_) {
+          // If parsing fails, treat as old format and clear
+          if (clearedFlag === '1') {
+            dispatch({ type: 'LOAD_FAVORITES', payload: [] });
+            clearUserFavoritesFromStorage(userId);
+            return;
           }
         }
+      }
 
-        // Then load server favorites
+      if (isAuthenticated && userId) {
+        // Load server first (source of truth)
         try {
           console.log('FavoritesContext: Loading favorites from server...');
           const response = await API_MAIN.get('/auth/favorites');
@@ -148,6 +178,33 @@ export const FavoritesProvider = ({ children }) => {
             dispatch({ type: 'LOAD_FAVORITES', payload: normalized });
             // Save to localStorage for offline access
             saveFavoritesToLocalStorage(userId, normalized);
+            // Only merge guest favorites if server is empty and guest favorites weren't explicitly cleared
+            const serverIsEmpty = normalized.length === 0;
+            const guestCleared = !!getFavoritesClearedFlagFromLocal('favorites_cleared_guest');
+            if (serverIsEmpty && !guestCleared) {
+              const guestFavs = loadFavoritesFromLocalStorage(null);
+              if (guestFavs && guestFavs.length > 0) {
+                try {
+                  for (const pf of guestFavs) {
+                    if (pf?._id) {
+                      await API_MAIN.post('/auth/favorites/add', { productId: pf._id });
+                    }
+                  }
+                  clearUserFavoritesFromStorage(null);
+                  showSuccess('Synced your favorites', { duration: 3000 });
+                  // Reload server favorites after merge
+                  const response2 = await API_MAIN.get('/auth/favorites');
+                  if (response2.data.success) {
+                    const serverFavorites2 = response2.data.data.favorites || [];
+                    const normalized2 = serverFavorites2
+                      .map((fav) => fav && (fav.product || fav))
+                      .filter(Boolean);
+                    dispatch({ type: 'LOAD_FAVORITES', payload: normalized2 });
+                    saveFavoritesToLocalStorage(userId, normalized2);
+                  }
+                } catch (_) { /* best-effort */ }
+              }
+            }
             return;
           }
         } catch (error) {
@@ -171,6 +228,9 @@ export const FavoritesProvider = ({ children }) => {
   }, [isAuthenticated, user?._id, showSuccess]);
 
   const addToFavorites = async (product) => {
+    if (!product || !product._id) return;
+    // Once user adds something, clear any session cleared flag
+    try { sessionStorage.removeItem('favorites_cleared'); } catch (_) {}
     console.log('FavoritesContext: Adding to favorites:', product.name, product._id);
     
     // Update local state immediately for better UX
@@ -208,6 +268,7 @@ export const FavoritesProvider = ({ children }) => {
   };
 
   const removeFromFavorites = async (productId) => {
+    if (!productId) return;
     // Update local state immediately
     dispatch({
       type: 'REMOVE_FROM_FAVORITES',
@@ -228,18 +289,58 @@ export const FavoritesProvider = ({ children }) => {
     }
   };
 
-  // Save to localStorage whenever favorites change
+  // Save to localStorage whenever favorites change (persist empty to clear stale data)
   useEffect(() => {
     const userId = user?._id;
-    if (state.items.length > 0) {
-      saveFavoritesToLocalStorage(userId, state.items);
-    }
+    saveFavoritesToLocalStorage(userId, state.items);
   }, [state.items, user?._id]);
 
-  const clearFavorites = () => {
-    dispatch({ type: 'CLEAR_FAVORITES' });
+  const clearFavorites = async () => {
     const userId = user?._id;
-    clearUserFavoritesFromStorage(userId);
+    const itemsSnapshot = [...state.items];
+
+    // Optimistically clear UI
+    dispatch({ type: 'CLEAR_FAVORITES' });
+    
+    // Set session flag with timestamp (expires after 7 days)
+    try { 
+      const clearData = { 
+        cleared: true, 
+        timestamp: Date.now(),
+        userId: userId || 'guest'
+      };
+      sessionStorage.setItem('favorites_cleared', JSON.stringify(clearData));
+    } catch (_) {}
+
+    // Aggressively clear all possible localStorage keys (user + guest + legacy)
+    try {
+      const dataToSave = { items: [], timestamp: Date.now(), userId: userId || 'guest' };
+      localStorage.setItem(userId ? getFavoritesStorageKey(userId) : getGuestFavoritesStorageKey(), JSON.stringify(dataToSave));
+      localStorage.setItem(getGuestFavoritesStorageKey(), JSON.stringify({ items: [], timestamp: Date.now(), userId: 'guest' }));
+      if (userId) {
+        localStorage.setItem(getFavoritesStorageKey(userId), JSON.stringify(dataToSave));
+      }
+      // Also set a durable cleared flag to prevent future re-sync
+      const clearedMarker = JSON.stringify({ cleared: true, timestamp: Date.now(), userId: userId || 'guest' });
+      localStorage.setItem(userId ? `favorites_cleared_${userId}` : 'favorites_cleared_guest', clearedMarker);
+      // Clear any legacy keys if they existed
+      localStorage.removeItem('favorites');
+      localStorage.removeItem('cart');
+    } catch (_) {}
+
+    // Best-effort: clear server by removing each favorite when authenticated
+    if (isAuthenticated) {
+      try {
+        for (const pf of itemsSnapshot) {
+          const pid = pf?._id;
+          if (pid) {
+            try { await API_MAIN.delete(`/auth/favorites/remove/${pid}`); } catch (_) {}
+          }
+        }
+        // If a bulk clear endpoint exists, call as well
+        try { await API_MAIN.post('/auth/favorites/clear'); } catch (_) {}
+      } catch (_) {}
+    }
   };
 
   const isFavorite = (productId) => {

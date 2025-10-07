@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_MAIN } from '../api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Login from '../components/Login';
@@ -194,49 +195,50 @@ const BackButton = styled.button`
 
 const PaymentMethodGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 1rem;
 `;
 
 const PaymentMethod = styled.div`
   border: 2px solid ${props => props.selected ? '#8B5CF6' : '#e5e7eb'};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+  border-radius: 10px;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: ${props => props.selected ? '#f8f9ff' : 'white'};
+  transition: all 0.2s ease;
+  background: ${props => props.selected ? '#f6f7ff' : 'white'};
   position: relative;
+  min-height: 84px;
   
   &:hover {
     border-color: #8B5CF6;
-    background: #f8f9ff;
+    background: #f6f7ff;
   }
 `;
 
 const PaymentIcon = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   background: ${props => props.color};
-  border-radius: 0.75rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
 `;
 
 const PaymentName = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #1e1e2f;
-  margin-bottom: 0.5rem;
+  margin: 0 0 2px 0;
 `;
 
 const PaymentDescription = styled.p`
-  color: #666;
-  font-size: 0.9rem;
+  color: #6b7280;
+  font-size: 0.75rem;
   margin: 0;
 `;
 
@@ -263,9 +265,10 @@ const CheckIcon = styled.div`
 const Checkout = () => {
   const navigate = useNavigate();
   const { items: cart, getCartTotal, clearCart } = useCart();
-  const { isAuthenticated, user, getAuthHeaders } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+  const [availableMethods, setAvailableMethods] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   
@@ -281,39 +284,49 @@ const Checkout = () => {
     country: 'Kenya'
   });
 
-  // Payment Methods
-  const paymentMethods = [
-    {
-      id: 'mpesa',
-      name: 'M-Pesa',
-      description: 'Pay with M-Pesa mobile money',
-      icon: <FaMobile />,
-      color: '#00A86B',
-      popular: true
-    },
-    {
-      id: 'paystack',
-      name: 'Paystack',
-      description: 'Cards, Bank Transfer, USSD, Mobile Money',
-      icon: <FaCreditCard />,
-      color: '#00A86B',
-      popular: true
-    },
-    {
-      id: 'paypal',
-      name: 'PayPal',
-      description: 'Pay with your PayPal account',
-      icon: <FaPaypal />,
-      color: '#0070BA'
-    },
-    {
-      id: 'bank',
-      name: 'Bank Transfer',
-      description: 'Direct bank transfer',
-      icon: <FaUniversity />,
-      color: '#1E3A8A'
-    }
-  ];
+  // Load available payment methods from backend (fallback to Paystack + M-Pesa)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await API_MAIN.get('/payments/methods');
+        if (!mounted) return;
+        if (data?.success && Array.isArray(data.data)) {
+          // Map server methods into UI models we support
+          const mapped = data.data
+            .filter(m => m.supported && (m.available || m.id === 'paystack'))
+            .map(m => ({
+              id: m.id,
+              name: m.name,
+              description: m.description,
+              color: m.color || '#8B5CF6',
+              icon: m.id === 'mpesa' ? <FaMobile /> : m.id === 'paypal' ? <FaPaypal /> : m.id === 'bank' ? <FaUniversity /> : <FaCreditCard />,
+              popular: m.id === 'paystack' || m.id === 'mpesa'
+            }));
+          // Prioritize Paystack then M-Pesa
+          mapped.sort((a, b) => {
+            const order = { paystack: 0, mpesa: 1 };
+            return (order[a.id] ?? 99) - (order[b.id] ?? 99);
+          });
+          setAvailableMethods(mapped);
+          // Default selection to Paystack if present, otherwise first available
+          const defaultId = mapped.find(m => m.id === 'paystack')?.id || mapped[0]?.id || '';
+          setSelectedPaymentMethod(defaultId);
+          return;
+        }
+      } catch (_) {}
+      // Fallback
+      const fallback = [
+        { id: 'paystack', name: 'Paystack', description: 'Cards, Bank, USSD, Mobile Money', icon: <FaCreditCard />, color: '#00A86B', popular: true },
+        { id: 'mpesa', name: 'M-Pesa', description: 'Pay with M-Pesa', icon: <FaMobile />, color: '#00A86B', popular: true }
+      ];
+      if (mounted) {
+        setAvailableMethods(fallback);
+        setSelectedPaymentMethod('paystack');
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const subtotal = getCartTotal();
   const shipping = subtotal > 10000 ? 0 : 1000; // Free shipping over KSH 10,000
@@ -352,7 +365,7 @@ const Checkout = () => {
     try {
       // Create order data with cart items
       const orderData = {
-        items: cart, // Send cart items directly
+        items: cart.map(ci => ({ product: ci?.product?._id || ci?.product?.id || ci?.product, quantity: ci?.quantity || 1 })),
         paymentMethod: selectedPaymentMethod,
         subtotal,
         shipping,
@@ -365,86 +378,54 @@ const Checkout = () => {
       // Create order first
       console.log('Sending order data:', orderData);
       
-      const orderResponse = await fetch('/api/shop/orders', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(orderData)
-      });
-
-      console.log('Order response status:', orderResponse.status);
-      
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json();
-        console.error('Order creation error:', errorData);
-        throw new Error(errorData.message || 'Failed to create order');
-      }
-
-      const orderResult = await orderResponse.json();
+      const { data: orderResult } = await API_MAIN.post('/shop/orders', orderData);
       console.log('Order created successfully:', orderResult);
       const orderId = orderResult.data.orderId;
 
       // Initiate payment based on selected method
-      let paymentData = {
-        orderId: orderId,
-        paymentMethod: selectedPaymentMethod
-      };
-
-      // Add phone number for M-Pesa
-      if (selectedPaymentMethod === 'mpesa') {
-        paymentData.phoneNumber = formData.phone;
-      }
-
-      console.log('Sending payment data:', paymentData);
-      
-      const paymentResponse = await fetch('/api/payments/initiate', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(paymentData)
-      });
-
-      console.log('Payment response status:', paymentResponse.status);
-
-      if (!paymentResponse.ok) {
-        const errorData = await paymentResponse.json();
-        console.error('Payment initiation error:', errorData);
-        throw new Error(errorData.message || 'Failed to initiate payment');
-      }
-
-      const paymentResult = await paymentResponse.json();
-      console.log('Payment initiated successfully:', paymentResult);
-
-      // Handle different payment methods
       if (selectedPaymentMethod === 'paystack') {
-        // For Paystack, redirect to payment page
-        window.location.href = paymentResult.data.authorizationUrl;
+        const { data: initRes } = await API_MAIN.post('/paystack/orders/initialize', { orderId });
+        if (!initRes?.success) throw new Error(initRes?.message || 'Failed to initialize Paystack');
+        window.location.href = initRes.data.authorizationUrl;
         return;
-      } else if (selectedPaymentMethod === 'paypal') {
-        // Redirect to PayPal
-        window.location.href = paymentResult.data.approvalUrl;
-        return;
-      } else if (selectedPaymentMethod === 'bank') {
-        // Show bank transfer details
-        alert(`Bank Transfer Details:\n\nBank: ${paymentResult.data.bankDetails.bankName}\nAccount: ${paymentResult.data.bankDetails.accountNumber}\nReference: ${paymentResult.data.bankDetails.reference}\nAmount: KSH ${paymentResult.data.bankDetails.amount}\n\nPlease complete the transfer and send proof to payments@rebirthofaqueen.org`);
-      } else if (selectedPaymentMethod === 'mpesa') {
-        // M-Pesa payment initiated
-        alert('M-Pesa payment initiated! Please check your phone for the payment prompt and enter your M-Pesa PIN.');
+      }
+
+      if (selectedPaymentMethod === 'mpesa') {
+        const phoneRaw = (formData.phone || '').trim();
+        if (!phoneRaw) throw new Error('Phone is required for M-Pesa');
+        const { data: paymentResult } = await API_MAIN.post('/payments/initiate', {
+          orderId,
+          paymentMethod: 'mpesa',
+          phoneNumber: phoneRaw
+        });
+        if (!paymentResult?.success) throw new Error(paymentResult?.message || 'Failed to initiate M-Pesa');
+        alert('M-Pesa payment initiated! Check your phone to approve the payment.');
+      }
+
+      if (selectedPaymentMethod === 'paypal' || selectedPaymentMethod === 'bank') {
+        throw new Error('Selected payment method is not configured. Please use Paystack or M-Pesa.');
       }
 
       // Clear cart and redirect to success page
-      clearCart();
+      try { clearCart(); } catch (_) {}
       navigate('/order-success', { 
         state: { 
           orderId: orderId,
           orderNumber: orderResult.data.orderNumber,
           paymentMethod: selectedPaymentMethod,
-          total: total,
-          paymentData: paymentResult.data
+          total: total
         }
       });
 
     } catch (error) {
       console.error('Order creation error:', error);
-      alert(`Failed to place order: ${error.message}`);
+      const status = error?.response?.status;
+      const serverMsg = error?.response?.data?.message || error?.message || 'Unknown error';
+      if (status === 401) {
+        setShowLogin(true);
+        return;
+      }
+      alert(`Failed to place order: ${serverMsg}`);
     } finally {
       setIsProcessing(false);
     }
@@ -625,7 +606,7 @@ const Checkout = () => {
               </SectionTitle>
               
               <PaymentMethodGrid>
-                {paymentMethods.map((method) => (
+                {availableMethods.map((method) => (
                   <PaymentMethod
                     key={method.id}
                     selected={selectedPaymentMethod === method.id}
@@ -651,9 +632,9 @@ const Checkout = () => {
               {selectedPaymentMethod === 'mpesa' && (
                 <div style={{ 
                   backgroundColor: '#f8f9fa', 
-                  padding: '16px', 
+                  padding: '12px', 
                   borderRadius: '8px',
-                  marginTop: '16px'
+                  marginTop: '10px'
                 }}>
                   <h4 style={{ margin: '0 0 8px 0', color: '#2c3e50' }}>M-Pesa Payment Instructions:</h4>
                   <ol style={{ margin: 0, paddingLeft: '20px', color: '#666' }}>
@@ -668,9 +649,9 @@ const Checkout = () => {
               {selectedPaymentMethod === 'paystack' && (
                 <div style={{ 
                   backgroundColor: '#f8f9fa', 
-                  padding: '16px', 
+                  padding: '12px', 
                   borderRadius: '8px',
-                  marginTop: '16px'
+                  marginTop: '10px'
                 }}>
                   <h4 style={{ margin: '0 0 8px 0', color: '#2c3e50' }}>Paystack Payment:</h4>
                   <p style={{ margin: 0, color: '#666' }}>
@@ -683,9 +664,9 @@ const Checkout = () => {
               {selectedPaymentMethod === 'paypal' && (
                 <div style={{ 
                   backgroundColor: '#f8f9fa', 
-                  padding: '16px', 
+                  padding: '12px', 
                   borderRadius: '8px',
-                  marginTop: '16px'
+                  marginTop: '10px'
                 }}>
                   <h4 style={{ margin: '0 0 8px 0', color: '#2c3e50' }}>PayPal Payment:</h4>
                   <p style={{ margin: 0, color: '#666' }}>
@@ -697,9 +678,9 @@ const Checkout = () => {
               {selectedPaymentMethod === 'bank' && (
                 <div style={{ 
                   backgroundColor: '#f8f9fa', 
-                  padding: '16px', 
+                  padding: '12px', 
                   borderRadius: '8px',
-                  marginTop: '16px'
+                  marginTop: '10px'
                 }}>
                   <h4 style={{ margin: '0 0 8px 0', color: '#2c3e50' }}>Bank Transfer Details:</h4>
                   <div style={{ color: '#666', fontSize: '14px' }}>

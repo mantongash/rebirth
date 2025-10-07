@@ -37,13 +37,20 @@ import History from './pages/History';
 import Partners from './pages/Partners';
 import Volunteer from './pages/Volunteer';
 import Donate from './pages/Donate';
+
+// Program pages
+import SusanVillage from './pages/programs/SusanVillage';
+import Elimisha from './pages/programs/Elimisha';
+import AuthenticVoices from './pages/programs/AuthenticVoices';
+import VocationalTraining from './pages/programs/VocationalTraining';
+import VolunteerProgram from './pages/programs/Volunteer';
 import Partner from './pages/Partner';
 import Careers from './pages/Careers';
-import Shop from './pages/Shop';
 import ShopNaivas from './pages/ShopNaivas';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
+import OrderPayment from './pages/OrderPayment';
 import OrderHistory from './pages/OrderHistory';
 import Wishlist from './pages/Wishlist';
 import Favorites from './pages/Favorites';
@@ -133,6 +140,14 @@ function AppContent() {
             <Route path="/about" element={<Layout><About /></Layout>} />
             <Route path="/programs" element={<Layout><Programs /></Layout>} />
             <Route path="/our-programs" element={<Layout><OurPrograms /></Layout>} />
+            
+            {/* Program Routes */}
+            <Route path="/programs/susan-village" element={<Layout><SusanVillage /></Layout>} />
+            <Route path="/programs/elimisha" element={<Layout><Elimisha /></Layout>} />
+            <Route path="/programs/authentic-voices" element={<Layout><AuthenticVoices /></Layout>} />
+            <Route path="/programs/vocational-training" element={<Layout><VocationalTraining /></Layout>} />
+            <Route path="/programs/volunteer" element={<Layout><VolunteerProgram /></Layout>} />
+            
             <Route path="/impact" element={<Layout><Impact /></Layout>} />
             <Route path="/get-involved" element={<Layout><GetInvolved /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
@@ -158,6 +173,7 @@ function AppContent() {
             <Route path="/product/:productId" element={<Layout><ProductDetail /></Layout>} />
             <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
             <Route path="/order-success" element={<Layout><OrderSuccess /></Layout>} />
+            <Route path="/order/payment" element={<Layout><OrderPayment /></Layout>} />
             <Route path="/orders" element={<Layout><OrderHistory /></Layout>} />
             <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
             <Route path="/favorites" element={<Layout><Favorites /></Layout>} />

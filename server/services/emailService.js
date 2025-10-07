@@ -13,6 +13,65 @@ class EmailService {
     });
   }
 
+  // Send order receipt to buyer
+  async sendOrderReceipt(order) {
+    try {
+      const mailOptions = {
+        from: `"Rebirth of a Queen" <${process.env.SMTP_USER}>`,
+        to: order.customer?.email,
+        subject: `Order Receipt - ${order.orderNumber || order._id}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Order Receipt</title>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+              .receipt { background: white; border: 2px solid #3498db; padding: 20px; margin: 20px 0; border-radius: 8px; }
+              .items { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              .items th, .items td { border-bottom: 1px solid #f0f0f0; padding: 8px; text-align: left; font-size: 14px; }
+              .total { text-align: right; font-weight: bold; font-size: 16px; margin-top: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Order Receipt</h1>
+                <p>Order ${order.orderNumber || order._id}</p>
+              </div>
+              <div class="receipt">
+                <p><strong>Name:</strong> ${order.customer?.firstName} ${order.customer?.lastName}</p>
+                <p><strong>Email:</strong> ${order.customer?.email}</p>
+                <p><strong>Status:</strong> ${order.paymentStatus}</p>
+                <table class="items">
+                  <thead>
+                    <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+                  </thead>
+                  <tbody>
+                    ${(order.items || []).map(i => `<tr><td>${i.name}</td><td>${i.quantity}</td><td>${order.currency} ${i.price}</td><td>${order.currency} ${i.total}</td></tr>`).join('')}
+                  </tbody>
+                </table>
+                <div class="total">Grand Total: ${order.currency} ${order.total}</div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Order receipt sent successfully:', result.messageId);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('Error sending order receipt:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Send thank you email to donor
   async sendDonationThankYouEmail(donation) {
     try {

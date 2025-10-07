@@ -11,8 +11,26 @@ const getGuestStorageKey = () => 'cart_guest';
 
 const isDataExpired = (timestamp) => {
   const now = Date.now();
-  const twentyDaysInMs = 20 * 24 * 60 * 60 * 1000; // 20 days in milliseconds
-  return (now - timestamp) > twentyDaysInMs;
+  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds (like major e-commerce sites)
+  return (now - timestamp) > thirtyDaysInMs;
+};
+
+// Persisted clear flag helpers (prevents future re-sync)
+const getClearedFlagFromLocal = (key) => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const expired = (Date.now() - parsed.timestamp) > sevenDaysInMs;
+    if (expired) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed;
+  } catch (_) {
+    return null;
+  }
 };
 
 const saveToLocalStorage = (userId, cartData) => {
@@ -66,12 +84,15 @@ const clearUserCartFromStorage = (userId) => {
 const cartReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_TO_CART':
-      const existingItem = state.items.find(item => item.product._id === action.payload.product._id);
+      if (!action.payload || !action.payload.product || !action.payload.product._id) {
+        return state;
+      }
+      const existingItem = state.items.find(item => item?.product?._id === action.payload.product._id);
       if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
-            item.product._id === action.payload.product._id
+            (item?.product?._id === action.payload.product._id)
               ? { ...item, quantity: item.quantity + action.payload.quantity }
               : item
           )
@@ -86,14 +107,14 @@ const cartReducer = (state, action) => {
     case 'REMOVE_FROM_CART':
       return {
         ...state,
-        items: state.items.filter(item => item.product._id !== action.payload)
+        items: state.items.filter(item => item?.product?._id !== action.payload)
       };
 
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map(item =>
-          item.product._id === action.payload.productId
+          (item?.product?._id === action.payload.productId)
             ? { ...item, quantity: action.payload.quantity }
             : item
         )
@@ -127,28 +148,37 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const loadCart = async () => {
       const userId = user?._id;
+      const clearedFlag = sessionStorage.getItem('cart_cleared');
       
-      if (isAuthenticated && userId) {
-        // For authenticated users: if guest cart exists, merge it into server first
-        const guestItems = loadFromLocalStorage(null);
-        if (guestItems && guestItems.length > 0) {
-          try {
-            for (const gi of guestItems) {
-              const productId = gi.product?._id;
-              const quantity = gi.quantity || 1;
-              if (productId) {
-                await API_MAIN.post('/auth/cart/add', { productId, quantity });
-              }
-            }
-            // Clear guest storage after merge
-            clearUserCartFromStorage(null);
-            showSuccess('Synced your cart', { duration: 3000 });
-          } catch (mergeErr) {
-            // Best-effort merge; continue to load server cart regardless
+      // Check if user cleared cart (with timestamp check - expires after 7 days)
+      if (clearedFlag) {
+        try {
+          const clearData = JSON.parse(clearedFlag);
+          const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+          const isExpired = (Date.now() - clearData.timestamp) > sevenDaysInMs;
+          const isCurrentUser = clearData.userId === (userId || 'guest');
+          
+          if (clearData.cleared && !isExpired && isCurrentUser) {
+            dispatch({ type: 'LOAD_CART', payload: [] });
+            clearUserCartFromStorage(userId);
+            // Don't sync from server if user explicitly cleared
+            return;
+          } else if (isExpired) {
+            // Clear expired flag
+            sessionStorage.removeItem('cart_cleared');
+          }
+        } catch (_) {
+          // If parsing fails, treat as old format and clear
+          if (clearedFlag === '1') {
+            dispatch({ type: 'LOAD_CART', payload: [] });
+            clearUserCartFromStorage(userId);
+            return;
           }
         }
+      }
 
-        // Then load server cart (source of truth)
+      if (isAuthenticated && userId) {
+        // Load server first (source of truth)
         try {
           const res = await API_MAIN.get('/auth/cart');
           if (res.data?.success) {
@@ -156,6 +186,33 @@ export const CartProvider = ({ children }) => {
             dispatch({ type: 'LOAD_CART', payload: serverItems });
             // Save to localStorage for offline access
             saveToLocalStorage(userId, serverItems);
+            // Only merge guest data if server is empty and guest cart wasn't explicitly cleared
+            const serverIsEmpty = serverItems.length === 0;
+            const guestCleared = !!getClearedFlagFromLocal('cart_cleared_guest');
+            if (serverIsEmpty && !guestCleared) {
+              const guestItems = loadFromLocalStorage(null);
+              if (guestItems && guestItems.length > 0) {
+                try {
+                  for (const gi of guestItems) {
+                    const productId = gi.product?._id;
+                    const quantity = gi.quantity || 1;
+                    if (productId) {
+                      await API_MAIN.post('/auth/cart/add', { productId, quantity });
+                    }
+                  }
+                  // Clear guest storage after merge
+                  clearUserCartFromStorage(null);
+                  showSuccess('Synced your cart', { duration: 3000 });
+                  // Reload server cart after merge
+                  const res2 = await API_MAIN.get('/auth/cart');
+                  if (res2.data?.success) {
+                    const merged = (res2.data.data?.cart || []).map((ci) => ({ product: ci.product, quantity: ci.quantity }));
+                    dispatch({ type: 'LOAD_CART', payload: merged });
+                    saveToLocalStorage(userId, merged);
+                  }
+                } catch (_) { /* best-effort */ }
+              }
+            }
             return;
           }
           
@@ -187,15 +244,16 @@ export const CartProvider = ({ children }) => {
     loadCart();
   }, [isAuthenticated, user?._id, showSuccess]);
 
-  // Save to localStorage whenever cart changes
+  // Save to localStorage whenever cart changes (persist empty to clear stale data)
   useEffect(() => {
     const userId = user?._id;
-    if (state.items.length > 0) {
-      saveToLocalStorage(userId, state.items);
-    }
+    saveToLocalStorage(userId, state.items);
   }, [state.items, user?._id]);
 
   const addToCart = async (product, quantity = 1) => {
+    if (!product || !product._id) return;
+    // Once user adds something, clear any session cleared flag
+    try { sessionStorage.removeItem('cart_cleared'); } catch (_) {}
     dispatch({ type: 'ADD_TO_CART', payload: { product, quantity } });
     if (isAuthenticated) {
       try {
@@ -215,21 +273,63 @@ export const CartProvider = ({ children }) => {
     if (quantity <= 0) {
       removeFromCart(productId);
     } else {
+      if (!productId) return;
       dispatch({
         type: 'UPDATE_QUANTITY',
         payload: { productId, quantity }
       });
       if (isAuthenticated) {
-        try { await API_MAIN.post('/auth/cart/add', { productId, quantity }); } catch (_) {}
+        try { await API_MAIN.put('/auth/cart/update', { productId, quantity }); } catch (_) {}
       }
     }
   };
 
   const clearCart = async () => {
-    dispatch({ type: 'CLEAR_CART' });
     const userId = user?._id;
-    clearUserCartFromStorage(userId);
-    // Optionally call server to clear cart if endpoint exists
+    const itemsSnapshot = [...state.items];
+
+    // Optimistically clear UI
+    dispatch({ type: 'CLEAR_CART' });
+    
+    // Set session flag with timestamp (expires after 7 days)
+    try { 
+      const clearData = { 
+        cleared: true, 
+        timestamp: Date.now(),
+        userId: userId || 'guest'
+      };
+      sessionStorage.setItem('cart_cleared', JSON.stringify(clearData));
+    } catch (_) {}
+
+    // Aggressively clear all possible localStorage keys (user + guest + legacy)
+    try {
+      const dataToSave = { items: [], timestamp: Date.now(), userId: userId || 'guest' };
+      localStorage.setItem(userId ? getStorageKey(userId) : getGuestStorageKey(), JSON.stringify(dataToSave));
+      localStorage.setItem(getGuestStorageKey(), JSON.stringify({ items: [], timestamp: Date.now(), userId: 'guest' }));
+      if (userId) {
+        localStorage.setItem(getStorageKey(userId), JSON.stringify(dataToSave));
+      }
+      // Also set a durable cleared flag to prevent future re-sync
+      const clearedMarker = JSON.stringify({ cleared: true, timestamp: Date.now(), userId: userId || 'guest' });
+      localStorage.setItem(userId ? `cart_cleared_${userId}` : 'cart_cleared_guest', clearedMarker);
+      // Clear any legacy keys if they existed
+      localStorage.removeItem('cart');
+      localStorage.removeItem('favorites');
+    } catch (_) {}
+
+    // Best-effort: clear server by removing each item when authenticated
+    if (isAuthenticated) {
+      try {
+        for (const ci of itemsSnapshot) {
+          const pid = ci?.product?._id;
+          if (pid) {
+            try { await API_MAIN.delete(`/auth/cart/remove/${pid}`); } catch (_) {}
+          }
+        }
+        // If a bulk clear endpoint exists, call as well
+        try { await API_MAIN.post('/auth/cart/clear'); } catch (_) {}
+      } catch (_) {}
+    }
   };
 
   const getCartTotal = () => {

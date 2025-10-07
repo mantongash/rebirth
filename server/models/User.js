@@ -233,6 +233,12 @@ userSchema.methods.clearCart = function() {
   return this.save();
 };
 
+// Clear favorites method
+userSchema.methods.clearFavorites = function() {
+  this.favorites = [];
+  return this.save();
+};
+
 // Add to favorites method
 userSchema.methods.addToFavorites = function(productId) {
   const exists = this.favorites.some(fav => fav.product.toString() === productId.toString());

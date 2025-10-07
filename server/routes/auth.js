@@ -386,6 +386,41 @@ router.delete('/cart/clear', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/cart/clear
+// @desc    Clear user's cart (alt method for clients that prefer POST)
+// @access  Private
+router.post('/cart/clear', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    await user.clearCart();
+
+    res.json({
+      success: true,
+      message: 'Cart cleared successfully',
+      data: {
+        cart: [],
+        cartItemCount: 0,
+        cartTotal: 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Clear cart (POST) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to clear cart',
+      error: error.message
+    });
+  }
+});
+
 // @route   GET /api/auth/cart
 // @desc    Get user's cart with 20-day retention filtering
 // @access  Private
@@ -520,6 +555,72 @@ router.get('/favorites', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to get favorites',
+      error: error.message
+    });
+  }
+});
+
+// @route   DELETE /api/auth/favorites/clear
+// @desc    Clear user's favorites
+// @access  Private
+router.delete('/favorites/clear', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    await user.clearFavorites();
+
+    res.json({
+      success: true,
+      message: 'Favorites cleared successfully',
+      data: {
+        favorites: []
+      }
+    });
+
+  } catch (error) {
+    console.error('Clear favorites error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to clear favorites',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/auth/favorites/clear
+// @desc    Clear user's favorites (alt method for clients that prefer POST)
+// @access  Private
+router.post('/favorites/clear', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    await user.clearFavorites();
+
+    res.json({
+      success: true,
+      message: 'Favorites cleared successfully',
+      data: {
+        favorites: []
+      }
+    });
+
+  } catch (error) {
+    console.error('Clear favorites (POST) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to clear favorites',
       error: error.message
     });
   }

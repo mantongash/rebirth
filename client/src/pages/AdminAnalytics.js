@@ -8,9 +8,9 @@ import { renderIcon } from '../utils/iconMapper';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const Container = styled.div`
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding:1rem;
+  max-width: 100%;
+
 `;
 
 const Header = styled.div`

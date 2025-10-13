@@ -933,6 +933,88 @@ class EmailService {
       return { success: false, error: error.message };
     }
   }
+
+  // Send password reset email
+  async sendPasswordResetEmail(email, resetToken) {
+    try {
+      const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset - Rebirth of a Queen</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }
+            .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 20px 0; }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 14px; color: #666; }
+            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔐 Password Reset Request</h1>
+              <p>Rebirth of a Queen Foundation</p>
+            </div>
+            
+            <div class="content">
+              <h2>Hello!</h2>
+              <p>We received a request to reset your password for your Rebirth of a Queen account.</p>
+              
+              <p>If you made this request, click the button below to reset your password:</p>
+              
+              <div style="text-align: center;">
+                <a href="${resetUrl}" class="button">Reset My Password</a>
+              </div>
+              
+              <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul>
+                  <li>This link will expire in 10 minutes</li>
+                  <li>If you didn't request this reset, please ignore this email</li>
+                  <li>Your password will remain unchanged until you create a new one</li>
+                </ul>
+              </div>
+              
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">${resetUrl}</p>
+            </div>
+            
+            <div class="footer">
+              <p><strong>Best regards,</strong><br>
+              Rebirth of a Queen Team</p>
+              <p>📧 info@rebirthofaqueen.com<br>
+              📱 +254 700 000 000<br>
+              🌐 www.rebirthofaqueen.com</p>
+              <p>© ${new Date().getFullYear()} Rebirth of a Queen. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const mailOptions = {
+        from: `"Rebirth of a Queen" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Password Reset Request - Rebirth of a Queen',
+        html: htmlContent
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Password reset email sent successfully:', result.messageId);
+      return { success: true, messageId: result.messageId };
+
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new EmailService(); 

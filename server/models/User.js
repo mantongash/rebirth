@@ -27,8 +27,24 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function() {
+      return !this.googleId; // Password not required for Google OAuth users
+    },
     minlength: [6, 'Password must be at least 6 characters long']
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows multiple null values
+  },
+  provider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
+  },
+  profilePicture: {
+    type: String,
+    default: ''
   },
   role: {
     type: String,
@@ -46,6 +62,24 @@ const userSchema = new mongoose.Schema({
   phoneVerified: {
     type: Boolean,
     default: false
+  },
+  
+  // Password reset fields
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
+  },
+  resetPasswordOTP: {
+    type: String,
+    default: null
+  },
+  resetPasswordOTPExpires: {
+    type: Date,
+    default: null
   },
   
   // Address information
@@ -266,6 +300,37 @@ userSchema.methods.isFavorite = function(productId) {
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   this.loginCount += 1;
+  return this.save();
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function() {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  this.resetPasswordToken = token;
+  this.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  return this.save();
+};
+
+// Generate password reset OTP
+userSchema.methods.generatePasswordResetOTP = function() {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+  this.resetPasswordOTP = otp;
+  this.resetPasswordOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  return this.save();
+};
+
+// Clear password reset token
+userSchema.methods.clearPasswordResetToken = function() {
+  this.resetPasswordToken = null;
+  this.resetPasswordExpires = null;
+  return this.save();
+};
+
+// Clear password reset OTP
+userSchema.methods.clearPasswordResetOTP = function() {
+  this.resetPasswordOTP = null;
+  this.resetPasswordOTPExpires = null;
   return this.save();
 };
 

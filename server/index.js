@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
 require('dotenv').config();
 
 const connectDB = require('./config/db');
+const passport = require('./config/passport');
 const donationRoutes = require('./routes/donations');
 const mpesaRoutes = require('./routes/mpesa');
 const paypalRoutes = require('./routes/paypal');
@@ -33,6 +35,18 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Session configuration for OAuth
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Set to true in production with HTTPS
+}));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Public route to create/fix admin user (no authentication required)
 app.post('/api/setup-admin', async (req, res) => {

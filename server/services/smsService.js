@@ -539,6 +539,39 @@ class SMSService {
       return { success: false, error: error.message };
     }
   }
+
+  // Send password reset SMS
+  async sendPasswordResetSMS(phone, otp) {
+    try {
+      let formattedPhone = phone.replace(/^\+/, '');
+      if (!formattedPhone.startsWith('254')) {
+        formattedPhone = '254' + formattedPhone.replace(/^0/, '');
+      }
+
+      const message = `Your Rebirth of a Queen password reset code is: ${otp}. This code expires in 10 minutes. Do not share this code with anyone.`;
+
+      const payload = {
+        username: process.env.AT_USERNAME,
+        to: formattedPhone,
+        message: message,
+        from: this.senderId
+      };
+
+      const response = await axios.post(this.baseUrl, payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'apiKey': this.apiKey
+        }
+      });
+
+      console.log('Password reset SMS sent successfully:', response.data);
+      return { success: true, messageId: response.data.SMSMessageData?.Recipients?.[0]?.messageId };
+
+    } catch (error) {
+      console.error('Error sending password reset SMS:', error.response?.data || error.message);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new SMSService(); 

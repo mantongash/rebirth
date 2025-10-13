@@ -1,70 +1,59 @@
-// ContactUs.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaArrowRight, FaPaperPlane, FaUser, FaComments, FaBuilding, FaGlobe, FaMobile, FaFax, FaHeart, FaStar, FaCheckCircle, FaWhatsapp, FaYoutube, FaCalendarAlt, FaUserTie, FaHandshake, FaLightbulb, FaShieldAlt } from 'react-icons/fa';
+import { 
+  FaPhone, 
+  FaEnvelope, 
+  FaMapMarkerAlt, 
+  FaClock, 
+  FaFacebook, 
+  FaTwitter, 
+  FaInstagram, 
+  FaLinkedin, 
+  FaPaperPlane, 
+  FaCheckCircle, 
+  FaWhatsapp, 
+  FaYoutube, 
+  FaCalendarAlt 
+} from 'react-icons/fa';
 
+// Styled Components
 const Page = styled.div`
   min-height: 100vh;
-  background: #fff;
+  background: #f8f9fa;
 `;
 
 const Hero = styled.div`
-  background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 120px 20px 80px;
+  padding: 80px 20px 60px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('/images/education/orientation1 (7).jpg') center/cover;
-    opacity: 0.1;
-    z-index: 1;
-  }
 `;
 
 const HeroContent = styled.div`
-  position: relative;
-  z-index: 2;
-  max-width: 1200px;
+  max-width: 800px;
   margin: 0 auto;
 `;
 
 const HeroTitle = styled(motion.h1)`
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   line-height: 1.2;
-  color: white;
-
-  .highlight {
-    color: #fbbf24;
-  }
 
   @media (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 `;
 
 const HeroDescription = styled(motion.p)`
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
-  color: white;
+  font-size: 1.1rem;
   opacity: 0.9;
   line-height: 1.6;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 `;
 
@@ -75,31 +64,27 @@ const Container = styled.div`
 `;
 
 const Section = styled.section`
-  padding: 80px 0;
-
-  &:nth-child(even) {
-    background: #f8f9fa;
-  }
+  padding: 60px 0;
 `;
 
 const SectionTitle = styled(motion.h2)`
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 1rem;
-  color: #1e1e2f;
+  color: #2c3e50;
 
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 `;
 
 const SectionSubtitle = styled(motion.p)`
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: center;
   color: #666;
-  margin-bottom: 3rem;
-  max-width: 800px;
+  margin-bottom: 2rem;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.6;
@@ -108,8 +93,8 @@ const SectionSubtitle = styled(motion.p)`
 const ContactGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  margin-top: 3rem;
+  gap: 3rem;
+  margin-top: 2rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -120,16 +105,16 @@ const ContactGrid = styled.div`
 const ContactForm = styled(motion.div)`
   background: white;
   border-radius: 12px;
-  padding: 2.5rem;
+  padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
 `;
 
 const FormTitle = styled.h3`
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: #1e1e2f;
+  color: #2c3e50;
 `;
 
 const FormGroup = styled.div`
@@ -153,7 +138,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #e74c3c;
+    border-color: #667eea;
   }
 `;
 
@@ -169,17 +154,17 @@ const TextArea = styled.textarea`
 
   &:focus {
     outline: none;
-    border-color: #e74c3c;
+    border-color: #667eea;
   }
 `;
 
 const SubmitButton = styled(motion.button)`
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
   padding: 1rem 2rem;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -190,7 +175,7 @@ const SubmitButton = styled(motion.button)`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   }
 
   &:disabled {
@@ -203,18 +188,18 @@ const SubmitButton = styled(motion.button)`
 const ContactInfo = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 `;
 
 const InfoCard = styled.div`
   background: white;
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   transition: transform 0.3s ease;
 
   &:hover {
@@ -223,15 +208,15 @@ const InfoCard = styled.div`
 `;
 
 const InfoIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 `;
 
@@ -240,54 +225,55 @@ const InfoContent = styled.div`
 `;
 
 const InfoTitle = styled.h4`
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #1e1e2f;
+  margin-bottom: 0.25rem;
+  color: #2c3e50;
 `;
 
 const InfoText = styled.p`
   color: #666;
-  line-height: 1.5;
-  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  margin: 0;
+  font-size: 0.9rem;
 `;
 
 const InfoLink = styled.a`
-  color: #e74c3c;
+  color: #667eea;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 
   &:hover {
-    color: #c0392b;
+    color: #5a6fd8;
   }
 `;
 
 const InfoSecondary = styled.p`
   color: #888;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   margin-top: 0.25rem;
 `;
 
 const SocialSection = styled.div`
-  background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   color: white;
-  padding: 60px 0;
-  margin: 60px 0;
+  padding: 40px 0;
+  margin: 40px 0;
   border-radius: 12px;
 `;
 
 const SocialGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
 `;
 
 const SocialCard = styled(motion.div)`
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -299,49 +285,44 @@ const SocialCard = styled(motion.div)`
 `;
 
 const SocialIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 `;
 
 const SocialTitle = styled.h4`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: white;
 `;
 
 const SocialDescription = styled.p`
   color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
+  line-height: 1.4;
   margin-bottom: 1rem;
-`;
-
-const SocialFollowers = styled.div`
-  color: #fbbf24;
   font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
 `;
 
 const SocialButton = styled.a`
   background: rgba(255, 255, 255, 0.2);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -349,67 +330,14 @@ const SocialButton = styled.a`
   }
 `;
 
-const MapSection = styled.div`
-  margin: 60px 0;
-`;
-
-const MapContainer = styled.div`
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-`;
-
-const MapWrapper = styled.div`
-  height: 400px;
-  position: relative;
-`;
-
-const MapInfo = styled.div`
-  padding: 2rem;
-  background: #f8f9fa;
-`;
-
-const LocationTitle = styled.h4`
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #1e1e2f;
-`;
-
-const LocationAddress = styled.p`
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-`;
-
-const LocationDescription = styled.p`
-  color: #4B5563;
-  font-size: 0.95rem;
-  line-height: 1.5;
-`;
-
-const SuccessMessage = styled(motion.div)`
-  background: #d4edda;
-  color: #155724;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid #c3e6cb;
-`;
-
-const Grid = styled.div`
+const QuickContactGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-top: 3rem;
+  margin-top: 2rem;
 `;
 
-const Card = styled(motion.div)`
+const QuickCard = styled(motion.div)`
   background: white;
   border-radius: 12px;
   padding: 2rem;
@@ -424,51 +352,107 @@ const Card = styled(motion.div)`
   }
 `;
 
-const CardIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+const QuickIcon = styled.div`
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 1rem;
   color: white;
-  font-size: 2rem;
-`;
-
-const CardTitle = styled.h3`
   font-size: 1.5rem;
+`;
+
+const QuickTitle = styled.h3`
+  font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  color: #1e1e2f;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
 `;
 
-const CardText = styled.p`
+const QuickText = styled.p`
   color: #666;
-  line-height: 1.6;
+  line-height: 1.5;
   margin-bottom: 1.5rem;
+  font-size: 0.95rem;
 `;
 
-const CTAButton = styled(motion.button)`
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+const QuickButton = styled(motion.a)`
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
+  text-decoration: none;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   }
+`;
+
+const MapSection = styled.div`
+  margin: 40px 0;
+`;
+
+const MapContainer = styled.div`
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+`;
+
+const MapWrapper = styled.div`
+  height: 300px;
+  position: relative;
+`;
+
+const MapInfo = styled.div`
+  padding: 1.5rem;
+  background: #f8f9fa;
+`;
+
+const LocationTitle = styled.h4`
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+`;
+
+const LocationAddress = styled.p`
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+`;
+
+const LocationDescription = styled.p`
+  color: #4B5563;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+`;
+
+const SuccessMessage = styled(motion.div)`
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #c3e6cb;
 `;
 
 export default function Contact() {
@@ -559,13 +543,6 @@ export default function Contact() {
       link: "8:00 AM - 6:00 PM",
       href: "#",
       secondary: "Saturday: 9:00 AM - 2:00 PM"
-    },
-    {
-      icon: <FaCalendarAlt />,
-      title: "Appointments",
-      text: "Schedule a Visit",
-      link: "Book Online",
-      href: "#"
     }
   ];
 
@@ -573,50 +550,44 @@ export default function Contact() {
     {
       icon: <FaFacebook />,
       title: "Facebook",
-      description: "Follow us on Facebook for updates, stories, and community engagement.",
-      buttonText: "Follow Us",
-      href: "https://facebook.com/rebirthofaqueen",
-      followers: "2.5K+"
+      description: "Follow us for updates and community engagement.",
+      buttonText: "Follow",
+      href: "https://facebook.com/rebirthofaqueen"
     },
     {
       icon: <FaTwitter />,
       title: "Twitter",
-      description: "Stay connected with our latest news, events, and impact stories.",
-      buttonText: "Follow Us",
-      href: "https://twitter.com/rebirthofaqueen",
-      followers: "1.8K+"
+      description: "Stay connected with our latest news and events.",
+      buttonText: "Follow",
+      href: "https://twitter.com/rebirthofaqueen"
     },
     {
       icon: <FaInstagram />,
       title: "Instagram",
-      description: "See our work in action through photos and videos of our programs.",
-      buttonText: "Follow Us",
-      href: "https://instagram.com/rebirthofaqueen",
-      followers: "3.2K+"
+      description: "See our work through photos and videos.",
+      buttonText: "Follow",
+      href: "https://instagram.com/rebirthofaqueen"
     },
     {
       icon: <FaYoutube />,
       title: "YouTube",
-      description: "Watch our impact videos, program highlights, and community stories.",
+      description: "Watch our impact videos and stories.",
       buttonText: "Subscribe",
-      href: "https://youtube.com/rebirthofaqueen",
-      followers: "1.2K+"
+      href: "https://youtube.com/rebirthofaqueen"
     },
     {
       icon: <FaLinkedin />,
       title: "LinkedIn",
-      description: "Connect with us professionally and learn about career opportunities.",
+      description: "Connect professionally and learn about opportunities.",
       buttonText: "Connect",
-      href: "https://linkedin.com/company/rebirthofaqueen",
-      followers: "850+"
+      href: "https://linkedin.com/company/rebirthofaqueen"
     },
     {
       icon: <FaWhatsapp />,
       title: "WhatsApp",
-      description: "Join our WhatsApp community for instant updates and direct support.",
-      buttonText: "Join Group",
-      href: "https://wa.me/254700000000",
-      followers: "500+"
+      description: "Join our community for instant updates.",
+      buttonText: "Join",
+      href: "https://wa.me/254700000000"
     }
   ];
 
@@ -629,7 +600,7 @@ export default function Contact() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            Get in <span className="highlight">Touch</span>
+            Get in Touch
           </HeroTitle>
           <HeroDescription
             initial={{ opacity: 0, y: 30 }}
@@ -811,9 +782,8 @@ export default function Contact() {
                   <SocialIcon>{platform.icon}</SocialIcon>
                   <SocialTitle>{platform.title}</SocialTitle>
                   <SocialDescription>{platform.description}</SocialDescription>
-                  <SocialFollowers>{platform.followers} followers</SocialFollowers>
                   <SocialButton href={platform.href} target="_blank" rel="noopener noreferrer">
-                    {platform.buttonText} <FaArrowRight />
+                    {platform.buttonText}
                   </SocialButton>
                 </SocialCard>
               ))}
@@ -840,20 +810,19 @@ export default function Contact() {
               Choose the most convenient way to reach us based on your needs
             </SectionSubtitle>
             
-            <Grid>
-              <Card
+            <QuickContactGrid>
+              <QuickCard
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
               >
-                <CardIcon style={{ background: 'linear-gradient(135deg, #25d366, #128c7e)' }}>
+                <QuickIcon style={{ background: 'linear-gradient(135deg, #25d366, #128c7e)' }}>
                   <FaWhatsapp />
-                </CardIcon>
-                <CardTitle>WhatsApp Support</CardTitle>
-                <CardText>Get instant help and quick responses to your questions through WhatsApp.</CardText>
-                <CTAButton
-                  as="a"
+                </QuickIcon>
+                <QuickTitle>WhatsApp Support</QuickTitle>
+                <QuickText>Get instant help and quick responses to your questions through WhatsApp.</QuickText>
+                <QuickButton
                   href="https://wa.me/254700000000"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -862,53 +831,50 @@ export default function Contact() {
                   whileTap={{ scale: 0.95 }}
                 >
                   Chat Now <FaWhatsapp />
-                </CTAButton>
-              </Card>
+                </QuickButton>
+              </QuickCard>
 
-              <Card
+              <QuickCard
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <CardIcon style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)' }}>
+                <QuickIcon style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
                   <FaPhone />
-                </CardIcon>
-                <CardTitle>Call Us</CardTitle>
-                <CardText>Speak directly with our team for immediate assistance and detailed information.</CardText>
-                <CTAButton
-                  as="a"
+                </QuickIcon>
+                <QuickTitle>Call Us</QuickTitle>
+                <QuickText>Speak directly with our team for immediate assistance and detailed information.</QuickText>
+                <QuickButton
                   href="tel:+254700000000"
-                  style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)' }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Call Now <FaPhone />
-                </CTAButton>
-              </Card>
+                </QuickButton>
+              </QuickCard>
 
-              <Card
+              <QuickCard
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
               >
-                <CardIcon style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}>
+                <QuickIcon style={{ background: 'linear-gradient(135deg, #f39c12, #e67e22)' }}>
                   <FaCalendarAlt />
-                </CardIcon>
-                <CardTitle>Schedule Visit</CardTitle>
-                <CardText>Book an appointment to visit our facility and meet our team in person.</CardText>
-                <CTAButton
-                  as="a"
+                </QuickIcon>
+                <QuickTitle>Schedule Visit</QuickTitle>
+                <QuickText>Book an appointment to visit our facility and meet our team in person.</QuickText>
+                <QuickButton
                   href="#"
-                  style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}
+                  style={{ background: 'linear-gradient(135deg, #f39c12, #e67e22)' }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Book Appointment <FaCalendarAlt />
-                </CTAButton>
-              </Card>
-            </Grid>
+                </QuickButton>
+              </QuickCard>
+            </QuickContactGrid>
           </Container>
         </Section>
 
@@ -952,7 +918,7 @@ export default function Contact() {
                 <LocationTitle>Meridian Hospital</LocationTitle>
                 <LocationAddress>📍 Kiserian, Magadi Road, Kenya</LocationAddress>
                 <LocationDescription>
-                  Our main office is located at Meridian Hospital in Kiserian, providing easy access for visitors and community members. We're open Monday through Friday from 8:00 AM to 6:00 PM. Feel free to drop by or schedule an appointment in advance.
+                  Our main office is located at Meridian Hospital in Kiserian, providing easy access for visitors and community members. We're open Monday through Friday from 8:00 AM to 6:00 PM.
                 </LocationDescription>
               </MapInfo>
             </MapContainer>
@@ -962,4 +928,3 @@ export default function Contact() {
     </Page>
   );
 }
-

@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const User = require('../models/User');
 const { authenticateToken } = require('../middleware/auth');
+const EmailService = require('../services/emailService');
+const SMSService = require('../services/smsService');
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
@@ -621,6 +624,226 @@ router.post('/favorites/clear', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to clear favorites',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/auth/google
+// @desc    Google OAuth login
+// @access  Public
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+// @route   GET /api/auth/google/callback
+// @desc    Google OAuth callback
+// @access  Public
+router.get('/google/callback', 
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      // Update last login
+      await user.updateLastLogin();
+
+      res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${token}&user=${encodeURIComponent(JSON.stringify({
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        profilePicture: user.profilePicture
+      }))}`);
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      res.redirect(`${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent('Authentication failed')}`);
+    }
+  }
+);
+
+// @route   POST /api/auth/forgot-password
+// @desc    Send password reset email
+// @access  Public
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Generate reset token
+    await user.generatePasswordResetToken();
+
+    // Send reset email
+    await EmailService.sendPasswordResetEmail(user.email, user.resetPasswordToken);
+
+    res.json({
+      success: true,
+      message: 'Password reset email sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send password reset email',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/auth/forgot-password-sms
+// @desc    Send password reset SMS
+// @access  Public
+router.post('/forgot-password-sms', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Generate reset OTP
+    await user.generatePasswordResetOTP();
+
+    // Send reset SMS
+    await SMSService.sendPasswordResetSMS(user.phone, user.resetPasswordOTP);
+
+    res.json({
+      success: true,
+      message: 'Password reset SMS sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Forgot password SMS error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send password reset SMS',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password with token
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and new password are required'
+      });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.clearPasswordResetToken();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset password',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/auth/reset-password-otp
+// @desc    Reset password with OTP
+// @access  Public
+router.post('/reset-password-otp', async (req, res) => {
+  try {
+    const { phone, otp, newPassword } = req.body;
+
+    if (!phone || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone, OTP, and new password are required'
+      });
+    }
+
+    const user = await User.findOne({
+      phone,
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.clearPasswordResetOTP();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Reset password OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset password',
       error: error.message
     });
   }

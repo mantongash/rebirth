@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaBook, FaHandsHelping, FaFutbol, FaLightbulb, FaQuoteLeft, FaQuoteRight, FaBullseye, FaEye, FaFlagCheckered, FaHandshake, FaDonate, FaArrowRight, FaArrowUp, FaChevronLeft, FaChevronRight, FaEnvelope, FaCalendarAlt, FaClock, FaUserFriends, FaGift, FaChartLine } from 'react-icons/fa';
+import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaBook, FaHandsHelping, FaFutbol, FaLightbulb, FaQuoteLeft, FaQuoteRight, FaBullseye, FaEye, FaFlagCheckered, FaHandshake, FaDonate, FaArrowRight, FaArrowUp, FaChevronLeft, FaChevronRight, FaEnvelope, FaCalendarAlt, FaClock, FaUserFriends, FaGift, FaChartLine, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
 import Chatbot from '../components/Chatbot';
@@ -109,6 +109,44 @@ const HeroVideo = styled.video`
     height: 100vh;
     object-fit: cover;
     object-position: 50% 15%;
+  }
+`;
+
+const AudioControlButton = styled(motion.button)`
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  @media (max-width: 768px) {
+    top: 1rem;
+    right: 1rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
   }
 `;
 
@@ -1462,6 +1500,16 @@ const PurposeDesc = styled.p`
 
 
 const Home = () => {
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoRef, setVideoRef] = useState(null);
+
+  const toggleAudio = () => {
+    if (videoRef) {
+      videoRef.muted = !videoRef.muted;
+      setIsMuted(videoRef.muted);
+    }
+  };
+
   const stats = [
     { icon: <FaUsers />, number: '250+', label: 'Women Supported Through Shelter' },
     { icon: <FaGraduationCap />, number: '450+', label: 'Youth Trained in Skills' },
@@ -1588,6 +1636,7 @@ const Home = () => {
       <HeroSection id="hero">
         <HeroBg>
           <HeroVideo 
+            ref={setVideoRef}
             autoPlay 
             muted 
             loop 
@@ -1602,6 +1651,16 @@ const Home = () => {
             type="video/mp4" />
             Your browser does not support the video tag.
           </HeroVideo>
+          <AudioControlButton
+            onClick={toggleAudio}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1, duration: 0.5 }}
+          >
+            {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+          </AudioControlButton>
         </HeroBg>
         <HeroContent
           as={motion.div}

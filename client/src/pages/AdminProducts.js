@@ -481,7 +481,7 @@ const AdminProducts = () => {
           <SearchIcon><FaSearch /></SearchIcon>
           <SearchInput
             type="text"
-            placeholder="Search products by name, category, or description..."
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -1066,22 +1066,13 @@ const AdminProducts = () => {
 
 // Styled Components
 const Container = styled.div`
-  padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100%;
+  max-width: 100%;
+  padding: 1.5rem;
+  background: #f8fafc;
   min-height: 100vh;
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-    pointer-events: none;
-  }
+  box-sizing: border-box;
+  overflow-x: hidden;
 `;
 
 const Header = styled.div`
@@ -1090,6 +1081,11 @@ const Header = styled.div`
   align-items: flex-start;
   margin-bottom: 2rem;
   gap: 2rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -1102,18 +1098,13 @@ const HeaderContent = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
   margin-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(45deg, #fff, #f0f0f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 `;
 
@@ -1124,10 +1115,9 @@ const Stats = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 1rem 1.5rem;
   text-align: center;
   min-width: 120px;
@@ -1135,43 +1125,41 @@ const StatCard = styled.div`
   
   &:hover {
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const StatNumber = styled.div`
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b;
   margin-bottom: 0.25rem;
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  color: #64748b;
   font-weight: 500;
 `;
 
 const AddButton = styled.button`
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: #3b82f6;
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-  font-size: 1rem;
+  font-size: 0.9rem;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-    background: linear-gradient(135deg, #ff5252, #d63031);
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   }
   
   &:active {
@@ -1184,11 +1172,11 @@ const Filters = styled.div`
   gap: 1.5rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -1199,39 +1187,38 @@ const Filters = styled.div`
 const SearchContainer = styled.div`
   position: relative;
   flex: 1;
-  min-width: 300px;
+  max-width: 400px;
+  min-width: 250px;
 `;
 
 const SearchIcon = styled.div`
   position: absolute;
   left: 1rem;
-  top: 50%;
+  top: 35%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.6);
+  color: #64748b;
   font-size: 1rem;
   z-index: 1;
 `;
 
 const SearchInput = styled.input`
-  width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 1rem;
-  backdrop-filter: blur(10px);
+  width: 70%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
   
   &::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: #9ca3af;
   }
   
   &:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 `;
 
@@ -1243,9 +1230,9 @@ const FilterGroup = styled.div`
 `;
 
 const FilterLabel = styled.label`
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #374151;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1253,23 +1240,22 @@ const FilterLabel = styled.label`
 
 const Select = styled.select`
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: white;
+  color: #1e293b;
   font-size: 0.9rem;
-  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   
   &:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.15);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
   option {
-    background: #333;
-    color: white;
+    background: white;
+    color: #1e293b;
   }
 `;
 
@@ -1287,14 +1273,14 @@ const LoadingSpinner = styled.div`
   justify-content: center;
   gap: 1rem;
   padding: 3rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   
   .spinner {
     animation: spin 1s linear infinite;
-    color: white;
+    color: #3b82f6;
     font-size: 2rem;
   }
 
@@ -1305,8 +1291,8 @@ const LoadingSpinner = styled.div`
 `;
 
 const LoadingText = styled.div`
-  color: white;
-  font-size: 1.1rem;
+  color: #64748b;
+  font-size: 1rem;
   font-weight: 500;
 `;
 
@@ -1317,29 +1303,29 @@ const EmptyState = styled.div`
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   margin: 2rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const EmptyIcon = styled.div`
-  font-size: 4rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 3rem;
+  color: #9ca3af;
   margin-bottom: 1rem;
 `;
 
 const EmptyTitle = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  color: white;
+  color: #1e293b;
   margin-bottom: 0.5rem;
 `;
 
 const EmptyMessage = styled.p`
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
   margin-bottom: 2rem;
   max-width: 400px;
   line-height: 1.5;
@@ -1347,37 +1333,37 @@ const EmptyMessage = styled.p`
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 `;
 
 const ProductCard = styled.div`
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
   }
 `;
 
 const ProductImage = styled.div`
-  height: 220px;
+  height: 160px;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f8fafc;
 
   img {
     width: 100%;
@@ -1398,55 +1384,53 @@ const PlaceholderImage = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  color: #666;
-  font-size: 0.9rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
   gap: 0.5rem;
   
   svg {
-    font-size: 2rem;
+    font-size: 1.5rem;
     opacity: 0.5;
   }
 `;
 
 const FeaturedBadge = styled.div`
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  top: 0.5rem;
+  left: 0.5rem;
+  background: #ef4444;
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 `;
 
 const OfferBadge = styled.div`
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #10b981;
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
 `;
 
 const ProductInfo = styled.div`
-  padding: 1.5rem;
+  padding: 1rem;
 `;
 
 const ProductName = styled.h3`
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #333;
-  line-height: 1.4;
+  margin-bottom: 0.4rem;
+  color: #1e293b;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1454,93 +1438,90 @@ const ProductName = styled.h3`
 `;
 
 const ProductCategory = styled.div`
-  font-size: 0.8rem;
-  color: #666;
-  margin-bottom: 0.75rem;
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
   font-weight: 500;
   letter-spacing: 0.5px;
 `;
 
 const ProductPrice = styled.div`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #2d3436;
-  margin-bottom: 0.5rem;
+  color: #1e293b;
+  margin-bottom: 0.4rem;
 `;
 
 const OriginalPrice = styled.div`
-  font-size: 1rem;
-  color: #999;
+  font-size: 0.9rem;
+  color: #9ca3af;
   text-decoration: line-through;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 `;
 
 const ProductStock = styled.div`
-  font-size: 0.85rem;
-  color: ${props => props.stock === 0 ? '#e17055' : '#00b894'};
-  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: ${props => props.stock === 0 ? '#ef4444' : '#10b981'};
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-weight: 500;
 `;
 
 const StockIcon = styled.div`
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: ${props => props.stock === 0 ? '#e17055' : '#00b894'};
+  background: ${props => props.stock === 0 ? '#ef4444' : '#10b981'};
 `;
 
 const ProductStatus = styled.div`
   display: inline-block;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   background: ${props => {
     switch (props.status) {
-      case 'active': return 'linear-gradient(135deg, #00b894, #00a085)';
-      case 'draft': return 'linear-gradient(135deg, #fdcb6e, #e17055)';
-      case 'inactive': return 'linear-gradient(135deg, #e17055, #d63031)';
-      default: return 'linear-gradient(135deg, #ddd, #bbb)';
+      case 'active': return '#10b981';
+      case 'draft': return '#f59e0b';
+      case 'inactive': return '#ef4444';
+      default: return '#6b7280';
     }
   }};
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const ProductActions = styled.div`
   display: flex;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  background: rgba(248, 249, 250, 0.5);
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
 `;
 
 const ActionButton = styled.button`
-  background: ${props => props.danger ? 'linear-gradient(135deg, #e17055, #d63031)' : 'linear-gradient(135deg, #74b9ff, #0984e3)'};
+  background: ${props => props.danger ? '#ef4444' : '#3b82f6'};
   color: white;
   border: none;
-  padding: 0.75rem;
-  border-radius: 8px;
+  padding: 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    background: ${props => props.danger ? 'linear-gradient(135deg, #d63031, #b71c1c)' : 'linear-gradient(135deg, #0984e3, #0770c4)'};
+    background: ${props => props.danger ? '#dc2626' : '#2563eb'};
+    transform: translateY(-1px);
   }
   
   &:active {
@@ -1555,16 +1536,16 @@ const Pagination = styled.div`
   gap: 1rem;
   margin-top: 2rem;
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const PageButton = styled.button`
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #f8fafc;
+  color: #374151;
+  border: 1px solid #d1d5db;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -1572,7 +1553,9 @@ const PageButton = styled.button`
   font-weight: 500;
   
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.3);
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
     transform: translateY(-1px);
   }
   
@@ -1583,7 +1566,7 @@ const PageButton = styled.button`
 `;
 
 const PageInfo = styled.div`
-  color: white;
+  color: #64748b;
   font-weight: 500;
   font-size: 0.9rem;
 `;

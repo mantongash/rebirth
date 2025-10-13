@@ -3,6 +3,11 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './Layout';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ResetPasswordOTP from './pages/ResetPasswordOTP';
+import AuthSuccess from './pages/AuthSuccess';
+import AuthError from './pages/AuthError';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -167,6 +172,11 @@ function AppContent() {
             <Route path="/careers" element={<Layout><Careers /></Layout>} />
             <Route path="/signup" element={<Layout><Signup /></Layout>} />
             <Route path="/login" element={<Layout><Login /></Layout>} />
+            <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
+            <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
+            <Route path="/reset-password-otp" element={<Layout><ResetPasswordOTP /></Layout>} />
+            <Route path="/auth/success" element={<AuthSuccess />} />
+            <Route path="/auth/error" element={<AuthError />} />
             <Route path="/profile" element={<Layout><Profile /></Layout>} />
             <Route path="/settings" element={<Layout><Settings /></Layout>} />
             <Route path="/shop" element={<Layout><ShopNaivas /></Layout>} />

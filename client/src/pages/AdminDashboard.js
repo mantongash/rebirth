@@ -32,6 +32,7 @@ ChartJS.register(
 const DashboardContainer = styled.div`
   padding: 0;
   max-width: 100%;
+  width: 100%;
 `;
 
 const StatsGrid = styled.div`
@@ -42,19 +43,19 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
   
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
   }
   
   &::before {
@@ -64,7 +65,7 @@ const StatCard = styled.div`
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
   }
 `;
 
@@ -79,7 +80,7 @@ const StatIcon = styled.div`
   width: 50px;
   height: 50px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,12 +92,14 @@ const StatValue = styled.div`
   font-size: 2rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  color: #1e293b;
 `;
 
 const StatLabel = styled.div`
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #64748b;
   margin-bottom: 0.5rem;
+  font-weight: 500;
 `;
 
 const StatChange = styled.div`
@@ -105,6 +108,7 @@ const StatChange = styled.div`
   gap: 0.5rem;
   font-size: 0.8rem;
   color: ${props => props.positive ? '#10b981' : props.negative ? '#ef4444' : '#6b7280'};
+  font-weight: 500;
 `;
 
 const ChartsSection = styled.div`
@@ -119,18 +123,18 @@ const ChartsSection = styled.div`
 `;
 
 const ChartCard = styled.div`
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const ChartTitle = styled.h3`
   margin: 0 0 1rem 0;
   font-size: 1.2rem;
   font-weight: 700;
+  color: #1e293b;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -143,12 +147,11 @@ const ChartContainer = styled.div`
 `;
 
 const RecentActivity = styled.div`
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const ActivityItem = styled.div`
@@ -156,7 +159,7 @@ const ActivityItem = styled.div`
   align-items: center;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid #f1f5f9;
   
   &:last-child {
     border-bottom: none;
@@ -167,11 +170,12 @@ const ActivityIcon = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1rem;
+  color: white;
 `;
 
 const ActivityContent = styled.div`
@@ -181,11 +185,13 @@ const ActivityContent = styled.div`
 const ActivityText = styled.div`
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
+  color: #1e293b;
+  font-weight: 500;
 `;
 
 const ActivityTime = styled.div`
   font-size: 0.75rem;
-  opacity: 0.7;
+  color: #64748b;
 `;
 
 const AdminDashboard = () => {
@@ -254,25 +260,25 @@ const AdminDashboard = () => {
     plugins: {
       legend: {
         labels: {
-          color: '#fff',
+          color: '#374151',
         },
       },
     },
     scales: {
       x: {
         ticks: {
-          color: '#fff',
+          color: '#6b7280',
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: '#f3f4f6',
         },
       },
       y: {
         ticks: {
-          color: '#fff',
+          color: '#6b7280',
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: '#f3f4f6',
         },
       },
     },
@@ -285,7 +291,7 @@ const AdminDashboard = () => {
       legend: {
         position: 'bottom',
         labels: {
-          color: '#fff',
+          color: '#374151',
           padding: 20,
         },
       },

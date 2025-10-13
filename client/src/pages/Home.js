@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaBook, FaHandsHelping, FaFutbol, FaLightbulb, FaQuoteLeft, FaQuoteRight, FaBullseye, FaEye, FaFlagCheckered, FaHandshake, FaDonate, FaArrowRight, FaArrowUp, FaChevronLeft, FaChevronRight, FaEnvelope, FaCalendarAlt, FaClock, FaUserFriends, FaGift, FaChartLine, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
-import Chatbot from '../components/Chatbot';
+// import Chatbot from '../components/Chatbot';
 
 // --- Hero Section with Video Background ---
 const heroContent = {
@@ -50,6 +50,15 @@ const latestNews = [
   }
 ];
 
+// Main page container to prevent shaking
+const PageContainer = styled.div`
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: relative;
+`;
+
 const HeroSection = styled.section`
   min-height: 100vh;
   width: 100%;
@@ -60,6 +69,7 @@ const HeroSection = styled.section`
   justify-content: center;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
   @media (max-width: 900px) {
     min-height: 100vh;
   }
@@ -288,6 +298,7 @@ const ScrollToTopButton = styled(motion.button)`
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   transition: all 0.3s ease;
   z-index: 1000;
+  pointer-events: auto;
   
   &:hover {
     background: ${({ theme }) => theme.palette.primary.dark || '#FFF'};
@@ -1510,18 +1521,7 @@ const Home = () => {
     }
   };
 
-  const stats = [
-    { icon: <FaUsers />, number: '250+', label: 'Women Supported Through Shelter' },
-    { icon: <FaGraduationCap />, number: '450+', label: 'Youth Trained in Skills' },
-    { icon: <FaHeart />, number: '700+', label: 'Teenagers Mentored' },
-    { icon: <FaStar />, number: '6+', label: 'Years of Impact' },
-  ];
-  const programs = [
-    { icon: <FaBook />, title: 'Raising Authentic Voices (RAV)', desc: 'Community-centered program fostering advocacy, mentorship, and education. Includes mentorship for vulnerable youth, scholarships, community advocacy forums, and literacy circles.' },
-    { icon: <FaHandsHelping />, title: 'Rebirth Empowerment & Wellness Hub', desc: '3-month training program bridging vulnerability and opportunity. Skills development in leather crafting, fashion design, IT, graphics, branding, storytelling, and filmmaking.' },
-    { icon: <FaFutbol />, title: 'Fitness for Therapy', desc: 'Wellness program integrating fitness as therapy, offering survivors access to sponsored gym memberships and wellness coaching for holistic healing.' },
-    { icon: <FaLightbulb />, title: 'The Susan Village Women\'s Shelter', desc: 'A healing space for survivors of sexual abuse and human trafficking, offering safe shelter, psychosocial support, and economic empowerment.' },
-  ];
+  // Removed unused stats and programs arrays for performance
   const stories = [
     { title: 'Amina’s Journey', text: 'From a small village to university graduate, Amina’s story is one of resilience and hope.', link: '/impact' },
     { title: 'Empowering Communities', text: 'How our programs are transforming entire communities in Kajiado County.', link: '/programs' },
@@ -1622,16 +1622,16 @@ const Home = () => {
 
   //
   const stagger = {
-    animate: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } }
+    animate: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } }
   };
   const fadeUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.7, type: 'spring', stiffness: 60 } },
-    exit: { opacity: 0, y: 30, transition: { duration: 0.4 } }
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, y: 20, transition: { duration: 0.3 } }
   };
 
   return (
-    <>
+    <PageContainer>
       {/* Hero */}
       <HeroSection id="hero">
         <HeroBg>
@@ -1641,7 +1641,7 @@ const Home = () => {
             muted 
             loop 
             playsInline
-            preload="auto"
+            preload="metadata"
             poster=""
             onLoadStart={() => console.log('Video loading started')}
             onCanPlay={() => console.log('Video can play')}
@@ -1747,7 +1747,8 @@ const Home = () => {
   {/* ✅ Use Cloudinary image directly */}
   <AboutImage 
     src="https://res.cloudinary.com/samokello/image/upload/v1758121594/rebirth-of-a-queen/images/orientation1_j9fvmd.jpg" 
-    alt="Empowered girls in education" 
+    alt="Empowered girls in education"
+    loading="lazy"
   />
 </AboutSection>
 
@@ -1764,11 +1765,12 @@ const Home = () => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: 0.1 * 0, duration: 0.6, type: 'spring', stiffness: 60 }}
+      transition={{ delay: 0.05 * 0, duration: 0.4, ease: "easeOut" }}
     >
       <ProgramImage 
         src="https://res.cloudinary.com/samokello/image/upload/v1758125601/rebirth-of-a-queen/images/2_lyj9qw.jpg" 
-        alt="Education program" 
+        alt="Education program"
+        loading="lazy"
       />
       <ProgramCardContent>
         <ProgramTitle>Education</ProgramTitle>
@@ -1782,11 +1784,12 @@ const Home = () => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: 0.1 * 1, duration: 0.6, type: 'spring', stiffness: 60 }}
+      transition={{ delay: 0.05 * 1, duration: 0.4, ease: "easeOut" }}
     >
       <ProgramImage 
         src="https://res.cloudinary.com/samokello/image/upload/v1758125515/rebirth-of-a-queen/images/fashion_w02nw6.jpg" 
-        alt="Empowerment program" 
+        alt="Empowerment program"
+        loading="lazy"
       />
       <ProgramCardContent>
         <ProgramTitle>Empowerment</ProgramTitle>
@@ -1800,11 +1803,12 @@ const Home = () => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: 0.1 * 2, duration: 0.6, type: 'spring', stiffness: 60 }}
+      transition={{ delay: 0.05 * 2, duration: 0.4, ease: "easeOut" }}
     >
       <ProgramImage 
         src="https://res.cloudinary.com/samokello/image/upload/v1758125620/rebirth-of-a-queen/images/6_jasfae.jpg" 
-        alt="Sports & Wellness program" 
+        alt="Sports & Wellness program"
+        loading="lazy"
       />
       <ProgramCardContent>
         <ProgramTitle>Sports & Wellness</ProgramTitle>
@@ -1818,11 +1822,12 @@ const Home = () => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: 0.1 * 3, duration: 0.6, type: 'spring', stiffness: 60 }}
+      transition={{ delay: 0.05 * 3, duration: 0.4, ease: "easeOut" }}
     >
       <ProgramImage 
         src="https://res.cloudinary.com/samokello/image/upload/v1758121424/rebirth-of-a-queen/images/orientation1_2_gqbuyl.jpg" 
-        alt="Innovation program" 
+        alt="Innovation program"
+        loading="lazy"
       />
       <ProgramCardContent>
         <ProgramTitle>Innovation</ProgramTitle>
@@ -1916,9 +1921,9 @@ const Home = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, type: 'spring', stiffness: 60 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <NewsImage src={news.image} alt={news.title} />
+              <NewsImage src={news.image} alt={news.title} loading="lazy" />
               <NewsContent>
                 <NewsMeta>
                   <NewsCategory>{news.category}</NewsCategory>
@@ -1941,22 +1946,22 @@ const Home = () => {
         <ImpactGrid>
           <ImpactCard>
             <ImpactIcon><FaUsers /></ImpactIcon>
-            <ImpactNumber><CountUp end={250} duration={2.5} separator="," />+</ImpactNumber>
+            <ImpactNumber><CountUp end={250} duration={1.5} separator="," />+</ImpactNumber>
             <ImpactLabel>Women Supported Through Shelter</ImpactLabel>
           </ImpactCard>
           <ImpactCard>
             <ImpactIcon><FaGraduationCap /></ImpactIcon>
-            <ImpactNumber><CountUp end={450} duration={2.5} separator="," />+</ImpactNumber>
+            <ImpactNumber><CountUp end={450} duration={1.5} separator="," />+</ImpactNumber>
             <ImpactLabel>Youth Trained in Skills</ImpactLabel>
           </ImpactCard>
           <ImpactCard>
             <ImpactIcon><FaHeart /></ImpactIcon>
-            <ImpactNumber><CountUp end={700} duration={2.5} />+</ImpactNumber>
+            <ImpactNumber><CountUp end={700} duration={1.5} />+</ImpactNumber>
             <ImpactLabel>Teenagers Mentored</ImpactLabel>
           </ImpactCard>
           <ImpactCard>
             <ImpactIcon><FaStar /></ImpactIcon>
-            <ImpactNumber><CountUp end={6} duration={2.5} />+</ImpactNumber>
+            <ImpactNumber><CountUp end={6} duration={1.5} />+</ImpactNumber>
             <ImpactLabel>Years of Impact</ImpactLabel>
           </ImpactCard>
         </ImpactGrid>
@@ -2341,9 +2346,9 @@ const Home = () => {
       </AnimatePresence>
       
 
-      {/* Chatbot */}
-      <Chatbot />
-    </>
+      {/* Chatbot - Temporarily disabled for performance */}
+      {/* <Chatbot /> */}
+    </PageContainer>
   );
 };
 export default Home; 

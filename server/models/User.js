@@ -182,7 +182,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // Indexes
-userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
 userSchema.index({ 'cart.product': 1 });
 userSchema.index({ 'favorites.product': 1 });

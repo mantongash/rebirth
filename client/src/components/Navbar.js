@@ -51,6 +51,7 @@ const navLinks = [
     ],
   },
   { label: 'Shop', to: '/shop', icon: <FaShoppingCart /> },
+  { label: 'Gallery', to: '/gallery' },
   {
     label: 'Our Impact',
     dropdown: [
@@ -314,6 +315,8 @@ const NavbarContent = styled.div`
   padding: 0 20px;
   height: 70px;
   position: relative;
+  width: 100%;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     padding: 0 16px;
@@ -366,11 +369,14 @@ const Logo = styled(Link)`
 const NavLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   margin: 0 auto;
   flex-wrap: nowrap;
   justify-content: center;
   white-space: nowrap;
+  flex: 1;
+  max-width: 600px;
+  justify-content: center;
 
   @media (max-width: 768px) {
     display: none;
@@ -385,8 +391,8 @@ const NavLinkStyled = styled(Link)`
   text-decoration: none;
   color: #333;
   font-weight: 500;
-  font-size: 14px;
-  padding: 6px 8px;
+  font-size: 13px;
+  padding: 5px 6px;
   position: relative;
   transition: color 0.2s;
   white-space: nowrap;
@@ -415,8 +421,8 @@ const NavLinkStyled = styled(Link)`
   `}
 
   @media (max-width: 768px) {
-    font-size: 12px;
-    padding: 4px 6px;
+    font-size: 11px;
+    padding: 3px 5px;
   }
 `;
 
@@ -425,8 +431,8 @@ const DropdownToggle = styled.button`
   border: none;
   color: #333;
   font-weight: 500;
-  font-size: 14px;
-  padding: 6px 8px;
+  font-size: 13px;
+  padding: 5px 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -436,10 +442,13 @@ const DropdownToggle = styled.button`
   white-space: nowrap;
   border-radius: 4px;
   flex-shrink: 0;
+  z-index: 1000;
 
   &:hover {
     color: #e74c3c;
     background: #f8f9fa;
+      z-index: 1000;
+
   }
 
   ${props => props.$active && css`
@@ -455,12 +464,14 @@ const DropdownToggle = styled.button`
       right: 0;
       height: 2px;
       background: #e74c3c;
+        z-index: 1000;
+
     }
   `}
 
   @media (max-width: 768px) {
-    font-size: 12px;
-    padding: 4px 6px;
+    font-size: 11px;
+    padding: 3px 5px;
   }
 `;
 
@@ -506,6 +517,8 @@ const DropdownItem = styled(Link)`
   font-size: 14px;
   border-radius: 8px;
   transition: background-color 0.2s, color 0.2s;
+    z-index: 1000;
+
 
   &:hover {
     background: #f8f9fa;
@@ -530,18 +543,19 @@ const DropdownItem = styled(Link)`
 const NavActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
+  min-width: 0;
 
   @media (max-width: 768px) {
-    gap: 6px;
+    gap: 4px;
   }
 `;
 
 const DesktopOnlyActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 
   @media (max-width: 768px) {
     display: none;
@@ -552,14 +566,15 @@ const DonateButton = styled(Link)`
   background: #e74c3c;
   color: white;
   text-decoration: none;
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 11px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: all 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background: #c0392b;
@@ -567,7 +582,7 @@ const DonateButton = styled(Link)`
   }
 
   svg {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   @media (max-width: 768px) {
@@ -580,11 +595,12 @@ const LoginButton = styled(Link)`
   background: #667eea;
   color: white;
   text-decoration: none;
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 11px;
   transition: all 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background: #5a6fd8;
@@ -779,6 +795,18 @@ const Navbar = () => {
         </NavLinks>
         
         <NavActions>
+          <DesktopOnlyActions>
+            {user ? (
+              <UserProfile user={user} onLogout={logout} />
+            ) : (
+              <LoginButton to="/login">Login</LoginButton>
+            )}
+            <DonateButton to="/donate">
+              <FaDonate />
+              Donate
+            </DonateButton>
+          </DesktopOnlyActions>
+          
           <FavoritesIconButton to={user ? "/favorites" : "/login"} aria-label="Favorites">
             <FaHeart />
             {user && favoriteItems && favoriteItems.length > 0 && (
@@ -796,18 +824,6 @@ const Navbar = () => {
           <MobileMenuButton onClick={toggleMobileMenu} aria-label="Toggle mobile menu">
             {mobileMenuOpen ? <FaTimes /> : <FaBars />}
           </MobileMenuButton>
-          
-          <DesktopOnlyActions>
-            {user ? (
-              <UserProfile user={user} onLogout={logout} />
-            ) : (
-              <LoginButton to="/login">Login</LoginButton>
-            )}
-            <DonateButton to="/donate">
-              <FaDonate />
-              Donate
-            </DonateButton>
-          </DesktopOnlyActions>
         </NavActions>
       </NavbarContent>
 

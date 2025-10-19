@@ -314,7 +314,19 @@ const AdminProducts = () => {
         const result = await response.json();
         console.log('Product saved successfully:', result);
         
-        alert(editingProduct ? 'Product updated successfully!' : 'Product created successfully!');
+        // Professional success notification (uses browser event to reach AdminLayout NotificationProvider)
+        try {
+          const evt = new CustomEvent('global-notification', {
+            detail: {
+              type: 'success',
+              title: editingProduct ? 'Product Updated' : 'Product Added',
+              message: `${result?.product?.name || formData.name || 'Product'} ${editingProduct ? 'updated' : 'added'} successfully`,
+              duration: 4000
+            }
+          });
+          window.dispatchEvent(evt);
+        } catch(_) {}
+        
         setShowModal(false);
         setEditingProduct(null);
         resetForm();
@@ -322,11 +334,31 @@ const AdminProducts = () => {
       } else {
         const error = await response.json();
         console.error('Error saving product:', error);
-        alert(`Error saving product: ${error.message || 'Unknown error'}`);
+        try {
+          const evt = new CustomEvent('global-notification', {
+            detail: {
+              type: 'error',
+              title: 'Save Failed',
+              message: error.message || 'Unknown error',
+              duration: 5000
+            }
+          });
+          window.dispatchEvent(evt);
+        } catch(_) {}
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert(`Error saving product: ${error.message}`);
+      try {
+        const evt = new CustomEvent('global-notification', {
+          detail: {
+            type: 'error',
+            title: 'Save Failed',
+            message: error.message,
+            duration: 5000
+          }
+        });
+        window.dispatchEvent(evt);
+      } catch(_) {}
     }
   };
 
@@ -1595,13 +1627,13 @@ const ModalOverlay = styled.div`
 const Modal = styled.div`
   background: white;
   border-radius: 20px;
-  width: 90%;
-  max-width: 900px;
+  width: 92%;
+  max-width: 1000px;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: modalSlideIn 0.3s ease-out;
+  box-shadow: 0 24px 64px rgba(2,6,23,0.18);
+  border: 1px solid #e9ecef;
+  animation: modalSlideIn 0.25s ease-out;
   margin-left: auto;
   margin-right: 20px;
 
@@ -1632,31 +1664,35 @@ const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #1f2937;
 `;
 
 const CloseButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  font-size: 1.1rem;
   cursor: pointer;
-  color: #666;
-  padding: 0.5rem;
+  color: #334155;
+  padding: 0.4rem 0.5rem;
+  border-radius: 10px;
 
   &:hover {
-    color: #333;
+    background: #f9fafb;
   }
 `;
 
 const ModalContent = styled.div`
-  padding: 2rem;
+  padding: 1.5rem;
+  background: #ffffff;
 `;
 
 const ModalFooter = styled.div`

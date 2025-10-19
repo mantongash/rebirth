@@ -117,8 +117,306 @@ router.get('/admin-info', async (req, res) => {
   }
 });
 
+// Test route to verify gallery creation (temporary)
+router.post('/gallery/test', async (req, res) => {
+  try {
+    console.log('🧪 Testing gallery creation...');
+    console.log('📝 Request body:', req.body);
+    
+    const testData = {
+      title: 'Test Gallery Event',
+      year: 2024,
+      description: 'This is a test gallery event',
+      images: [],
+      status: 'published',
+      isFeatured: false,
+      eventFrequency: 'one-time',
+      eventType: 'other'
+    };
+    
+    const content = new Content({
+      title: testData.title,
+      content: testData.description,
+      type: 'gallery',
+      category: 'events',
+      images: testData.images,
+      status: testData.status,
+      isFeatured: testData.isFeatured,
+      isPublic: true,
+      customFields: { year: testData.year },
+      eventFrequency: testData.eventFrequency,
+      eventType: testData.eventType
+    });
+    
+    await content.save();
+    console.log('✅ Test gallery created successfully:', content._id);
+    
+    res.json({ 
+      success: true, 
+      message: 'Test gallery created successfully',
+      data: content 
+    });
+  } catch (error) {
+    console.error('❌ Test gallery creation failed:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Test gallery creation failed', 
+      error: error.message 
+    });
+  }
+});
+
 // Protect all routes below this line with admin authentication
 router.use(authenticateAdmin);
+
+// =========================
+// Gallery (Events) Endpoints
+// =========================
+
+// Create a gallery event or add images to an event
+// Payload: { title, year, description, images:[{url, cloudinaryId, alt, caption}] , status }
+router.post('/gallery', async (req, res) => {
+  try {
+    console.log('🔍 Gallery creation request received');
+    console.log('📝 Request body:', JSON.stringify(req.body, null, 2));
+    console.log('👤 User:', req.user);
+    
+    const { 
+      title, 
+      year, 
+      description, 
+      images = [], 
+      status = 'published', 
+      isFeatured = false,
+      eventFrequency = 'one-time',
+      eventDate,
+      eventLocation,
+      eventType = 'other'
+    } = req.body || {};
+
+    console.log('📋 Parsed data:', {
+      title,
+      year,
+      description,
+      images: images.length,
+      status,
+      isFeatured,
+      eventFrequency,
+      eventDate,
+      eventLocation,
+      eventType
+    });
+
+    if (!title || !year) {
+      console.log('❌ Missing required fields:', { title: !!title, year: !!year });
+      return res.status(400).json({ success: false, message: 'Title and year are required' });
+    }
+
+    console.log('✅ Creating Content document...');
+    const content = new Content({
+      title,
+      content: description || `${title} - ${year}`,
+      type: 'gallery',
+      category: 'events',
+      images,
+      status,
+      isFeatured,
+      isPublic: true,
+      author: req.user && req.user._id ? req.user._id : undefined,
+      customFields: { year: parseInt(year) }, // Ensure year is a number
+      eventFrequency,
+      eventDate: eventDate ? new Date(eventDate) : undefined,
+      eventLocation,
+      eventType
+    });
+
+    console.log('💾 Saving Content to database...');
+    await content.save();
+    console.log('✅ Gallery item created successfully:', content._id);
+    
+    res.json({ success: true, data: content });
+  } catch (error) {
+    console.error('❌ Error creating gallery item:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to create gallery item', 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// List gallery items (admin view)
+router.get('/gallery', async (req, res) => {
+  try {
+    const { fromYear, toYear, status } = req.query;
+    const query = { type: 'gallery' };
+    if (status) query.status = status;
+    if (fromYear || toYear) {
+      const from = parseInt(fromYear || '0', 10);
+      const to = parseInt(toYear || '9999', 10);
+      query['customFields.year'] = { $gte: from, $lte: to };
+    }
+
+    const items = await Content.find(query).sort({ 'customFields.year': -1, createdAt: -1 });
+    res.json({ success: true, data: items });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch gallery items', error: error.message });
+  }
+});
+
+// Update a gallery item
+router.put('/gallery/:id', async (req, res) => {
+  try {
+    const { 
+      title, 
+      year, 
+      description, 
+      images = [], 
+      status = 'published', 
+      isFeatured = false,
+      eventFrequency = 'one-time',
+      eventDate,
+      eventLocation,
+      eventType = 'other'
+    } = req.body;
+
+    if (!title || !year) {
+      return res.status(400).json({ success: false, message: 'Title and year are required' });
+    }
+
+    const content = await Content.findById(req.params.id);
+    if (!content) {
+      return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    }
+
+    // Update fields
+    content.title = title;
+    content.content = description || `${title} - ${year}`;
+    content.status = status;
+    content.isFeatured = isFeatured;
+    content.customFields = { year };
+    content.eventFrequency = eventFrequency;
+    content.eventDate = eventDate ? new Date(eventDate) : undefined;
+    content.eventLocation = eventLocation;
+    content.eventType = eventType;
+    content.images = images;
+    content.lastModifiedBy = req.user._id;
+
+    await content.save();
+    res.json({ success: true, data: content });
+  } catch (error) {
+    console.error('Error updating gallery item:', error);
+    res.status(500).json({ success: false, message: 'Failed to update gallery item', error: error.message });
+  }
+});
+
+// Delete a gallery item
+router.delete('/gallery/:id', async (req, res) => {
+  try {
+    const content = await Content.findById(req.params.id);
+    if (!content) {
+      return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    }
+
+    // TODO: Delete images from Cloudinary if needed
+    await Content.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Gallery item deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting gallery item:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete gallery item', error: error.message });
+  }
+});
+
+// Get single gallery item
+router.get('/gallery/:id', async (req, res) => {
+  try {
+    const content = await Content.findById(req.params.id);
+    if (!content) {
+      return res.status(404).json({ success: false, message: 'Gallery item not found' });
+    }
+    res.json({ success: true, data: content });
+  } catch (error) {
+    console.error('Error fetching gallery item:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch gallery item', error: error.message });
+  }
+});
+
+// Gallery statistics endpoint
+router.get('/gallery/stats', async (req, res) => {
+  try {
+    const stats = await Content.aggregate([
+      { $match: { type: 'gallery' } },
+      {
+        $group: {
+          _id: null,
+          totalEvents: { $sum: 1 },
+          totalImages: { $sum: { $size: { $ifNull: ['$images', []] } } },
+          publishedEvents: {
+            $sum: { $cond: [{ $eq: ['$status', 'published'] }, 1, 0] }
+          },
+          featuredEvents: {
+            $sum: { $cond: [{ $eq: ['$isFeatured', true] }, 1, 0] }
+          },
+          annualEvents: {
+            $sum: { $cond: [{ $eq: ['$eventFrequency', 'annual'] }, 1, 0] }
+          },
+          monthlyEvents: {
+            $sum: { $cond: [{ $eq: ['$eventFrequency', 'monthly'] }, 1, 0] }
+          },
+          weeklyEvents: {
+            $sum: { $cond: [{ $eq: ['$eventFrequency', 'weekly'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    res.json({ 
+      success: true, 
+      data: stats[0] || {
+        totalEvents: 0,
+        totalImages: 0,
+        publishedEvents: 0,
+        featuredEvents: 0,
+        annualEvents: 0,
+        monthlyEvents: 0,
+        weeklyEvents: 0
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching gallery stats:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch gallery statistics', error: error.message });
+  }
+});
+
+// Update a gallery item (duplicate removed)
+router.put('/gallery/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body || {};
+    if (updates.year) {
+      if (!updates.customFields) updates.customFields = {};
+      updates.customFields.year = updates.year;
+      delete updates.year;
+    }
+    const updated = await Content.findByIdAndUpdate(id, updates, { new: true });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update gallery item', error: error.message });
+  }
+});
+
+// Delete a gallery item
+router.delete('/gallery/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Content.findByIdAndDelete(id);
+    res.json({ success: true, message: 'Gallery item deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete gallery item', error: error.message });
+  }
+});
 
 // Get dashboard data
 router.get('/dashboard', async (req, res) => {

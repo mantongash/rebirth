@@ -80,6 +80,22 @@ const contentSchema = new mongoose.Schema({
   customFields: {
     type: Map,
     of: mongoose.Schema.Types.Mixed
+  },
+  eventFrequency: {
+    type: String,
+    enum: ['annual', 'monthly', 'weekly', 'one-time'],
+    default: 'one-time'
+  },
+  eventDate: {
+    type: Date
+  },
+  eventLocation: {
+    type: String
+  },
+  eventType: {
+    type: String,
+    enum: ['celebration', 'fundraiser', 'workshop', 'meeting', 'outreach', 'other'],
+    default: 'other'
   }
 }, {
   timestamps: true

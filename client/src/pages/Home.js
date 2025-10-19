@@ -5,6 +5,7 @@ import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaBook, FaHandsHelping, FaFu
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
 // import Chatbot from '../components/Chatbot';
+import LogoutNotification, { useLogoutNotification } from '../components/LogoutNotification';
 
 // --- Hero Section with Video Background ---
 const heroContent = {
@@ -1513,6 +1514,7 @@ const PurposeDesc = styled.p`
 const Home = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [videoRef, setVideoRef] = useState(null);
+  const { showNotification, notificationData, hideNotification } = useLogoutNotification();
 
   const toggleAudio = () => {
     if (videoRef) {
@@ -2348,6 +2350,16 @@ const Home = () => {
 
       {/* Chatbot - Temporarily disabled for performance */}
       {/* <Chatbot /> */}
+      
+      {/* Logout Notification */}
+      <LogoutNotification
+        isVisible={showNotification}
+        title={notificationData?.title}
+        message={notificationData?.message}
+        icon={notificationData?.icon}
+        duration={5000}
+        onClose={hideNotification}
+      />
     </PageContainer>
   );
 };

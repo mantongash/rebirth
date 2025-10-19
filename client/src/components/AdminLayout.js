@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import styled, { keyframes, css } from 'styled-components';
+import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaBars, 
   FaUsers, 
@@ -15,42 +16,17 @@ import {
   FaTachometerAlt,
   FaFileAlt,
   FaEnvelope,
-  FaDollarSign
+  FaDollarSign,
+  FaCheck,
+  FaExclamationTriangle,
+  FaInfo,
+  FaImages
 } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 
-// Animations
-const slideIn = keyframes`
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-`;
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const pulse = keyframes`
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-`;
+// Animations removed - using framer-motion instead
 
 // Main Container
 const AdminContainer = styled.div`
@@ -62,8 +38,8 @@ const AdminContainer = styled.div`
 
 // Sidebar Styles
 const Sidebar = styled.aside`
-  width: ${props => props.collapsed ? '80px' : '280px'};
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  width: ${props => props.collapsed ? '80px' : '250px'};
+  background: #53185D;
   color: white;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: fixed;
@@ -98,7 +74,6 @@ const SidebarHeader = styled.div`
 const LogoContainer = styled.div`
   position: relative;
   width: 50%;
-  height: 70px;
   border-radius: 8px;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   display: flex;
@@ -117,7 +92,7 @@ const Logo = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 5px;
+  border-radius:5px;
 `;
 
 const LogoText = styled.div`
@@ -319,6 +294,9 @@ const MainContent = styled.main`
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
   background: #f8fafc;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   
   @media (max-width: 768px) {
     margin-left: 0;
@@ -439,6 +417,15 @@ const NotificationBadge = styled.span`
   text-align: center;
 `;
 
+const OnlineIndicator = styled.span`
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: 8px;
+  background: ${props => props.online ? '#10b981' : '#9ca3af'};
+`;
+
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
@@ -540,16 +527,151 @@ const FooterButton = styled.button`
   `}
 `;
 
+// Professional Notification Components
+const NotificationContainer = styled(motion.div)`
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  max-width: 400px;
+  width: 100%;
+`;
+
+const NotificationCard = styled(motion.div)`
+  background: ${props => {
+    switch(props.type) {
+      case 'success': return 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)';
+      case 'error': return 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)';
+      case 'warning': return 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)';
+      case 'info': return 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)';
+      default: return 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)';
+    }
+  }};
+  color: ${props => {
+    switch(props.type) {
+      case 'success': return '#155724';
+      case 'error': return '#721c24';
+      case 'warning': return '#856404';
+      case 'info': return '#0c5460';
+      default: return '#1565c0';
+    }
+  }};
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  border: 1px solid ${props => {
+    switch(props.type) {
+      case 'success': return '#c3e6cb';
+      case 'error': return '#f5c6cb';
+      case 'warning': return '#ffeaa7';
+      case 'info': return '#bee5eb';
+      default: return '#90caf9';
+    }
+  }};
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  margin-bottom: 1rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: ${props => {
+      switch(props.type) {
+        case 'success': return '#28a745';
+        case 'error': return '#dc3545';
+        case 'warning': return '#ffc107';
+        case 'info': return '#17a2b8';
+        default: return '#2196f3';
+      }
+    }};
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { width: 0; }
+    50% { width: 100%; }
+    100% { width: 0; }
+  }
+`;
+
+const NotificationIcon = styled(motion.div)`
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  backdrop-filter: blur(5px);
+`;
+
+const NotificationContent = styled.div`
+  flex: 1;
+`;
+
+const NotificationTitle = styled.h4`
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+`;
+
+const NotificationMessage = styled.p`
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.4;
+`;
+
+const ProgressBar = styled(motion.div)`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: ${props => {
+    switch(props.type) {
+      case 'success': return '#28a745';
+      case 'error': return '#dc3545';
+      case 'warning': return '#ffc107';
+      case 'info': return '#17a2b8';
+      default: return '#2196f3';
+    }
+  }};
+  border-radius: 0 0 16px 16px;
+`;
+
 // Main AdminLayout Component
 const AdminLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sidebarData, setSidebarData] = useState(null);
   const [menuQuery, setMenuQuery] = useState('');
+  const [notifications, setNotifications] = useState([]);
   const sidebarRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { adminUser, adminLogout } = useAdminAuth();
+  const { notifications: globalNotifications } = useNotification();
+  const online = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
   // Safe, real-time user info derived from context
   const adminDisplay = useMemo(() => {
@@ -591,8 +713,41 @@ const AdminLayout = ({ children }) => {
     };
   }, [adminUser]);
 
+  // Notification functions
+  const addNotification = (type, title, message, duration = 5000) => {
+    const id = Date.now() + Math.random();
+    const notification = { id, type, title, message, duration };
+    
+    setNotifications(prev => [...prev, notification]);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+      removeNotification(id);
+    }, duration);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
+
+  // Listen for cross-page notifications (e.g., from AdminProducts)
+  React.useEffect(() => {
+    const handler = (e) => {
+      const { type, title, message, duration } = e.detail || {};
+      if (type && title && message) addNotification(type, title, message, duration || 5000);
+    };
+    window.addEventListener('global-notification', handler);
+    return () => window.removeEventListener('global-notification', handler);
+  }, []);
+
   const handleLogout = async () => {
     try {
+      // Show logout notification
+      addNotification('info', 'Logging Out', 'You are being logged out of the admin panel...', 2000);
+      
+      // Wait a moment for the notification to show
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       await adminLogout();
     } finally {
       navigate('/admin/login');
@@ -699,6 +854,10 @@ const AdminLayout = ({ children }) => {
               <MenuIcon><FaBox /></MenuIcon>
               <MenuLabel hidden={collapsed}>Products</MenuLabel>
             </MenuItem>
+            <MenuItem to="/admin/gallery" className={location.pathname === '/admin/gallery' ? 'active' : ''} collapsed={collapsed}>
+              <MenuIcon><FaImages /></MenuIcon>
+              <MenuLabel hidden={collapsed}>Gallery</MenuLabel>
+            </MenuItem>
             <MenuItem to="/admin/orders" className={location.pathname === '/admin/orders' ? 'active' : ''} collapsed={collapsed}>
               <MenuIcon><FaShoppingCart /></MenuIcon>
               <MenuLabel hidden={collapsed}>Orders</MenuLabel>
@@ -790,14 +949,21 @@ const AdminLayout = ({ children }) => {
               />
             </SearchContainer>
             
-            <NotificationButton>
+            <NotificationButton aria-label="Notifications">
               <FaBell />
-              <NotificationBadge>3</NotificationBadge>
+              {globalNotifications.length > 0 && (
+                <NotificationBadge>{globalNotifications.length}</NotificationBadge>
+              )}
             </NotificationButton>
             
             <UserInfo>
-              <UserAvatar>{adminDisplay.initials}</UserAvatar>
-              <UserName>{adminDisplay.name || adminDisplay.username || 'Admin User'}</UserName>
+              <UserAvatar title={online ? 'Online' : 'Offline'}>
+                {adminDisplay.initials}
+              </UserAvatar>
+              <UserName>
+                {adminDisplay.name || adminDisplay.username || 'Admin User'}
+                <OnlineIndicator online={online} />
+              </UserName>
             </UserInfo>
           </TopBarRight>
         </TopBar>
@@ -806,6 +972,50 @@ const AdminLayout = ({ children }) => {
           {children}
         </DashboardContent>
       </MainContent>
+
+      {/* Professional Notifications */}
+      <NotificationContainer>
+        <AnimatePresence>
+          {notifications.map((notification) => (
+            <NotificationCard
+              key={notification.id}
+              type={notification.type}
+              initial={{ opacity: 0, x: 400, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 400, scale: 0.8 }}
+              transition={{ 
+                duration: 0.5,
+                type: "spring",
+                stiffness: 300,
+                damping: 25
+              }}
+            >
+              <NotificationIcon
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+              >
+                {notification.type === 'success' && <FaCheck />}
+                {notification.type === 'error' && <FaExclamationTriangle />}
+                {notification.type === 'warning' && <FaExclamationTriangle />}
+                {notification.type === 'info' && <FaInfo />}
+              </NotificationIcon>
+              
+              <NotificationContent>
+                <NotificationTitle>{notification.title}</NotificationTitle>
+                <NotificationMessage>{notification.message}</NotificationMessage>
+              </NotificationContent>
+
+              <ProgressBar
+                type={notification.type}
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: notification.duration / 1000, ease: "linear" }}
+              />
+            </NotificationCard>
+          ))}
+        </AnimatePresence>
+      </NotificationContainer>
     </AdminContainer>
   );
 };

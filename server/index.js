@@ -137,6 +137,32 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 
+// Public gallery endpoint
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const Content = require('./models/Content');
+    const { year } = req.query;
+    const query = { 
+      type: 'gallery', 
+      status: 'published',
+      isPublic: true 
+    };
+    
+    if (year) {
+      query['customFields.year'] = parseInt(year);
+    }
+    
+    const galleries = await Content.find(query)
+      .sort({ 'customFields.year': -1, createdAt: -1 })
+      .select('title content images customFields.year isFeatured createdAt');
+    
+    res.json({ success: true, data: galleries });
+  } catch (error) {
+    console.error('Error fetching public gallery:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch gallery' });
+  }
+});
+
 // Health Check Route with DB status
 app.get('/api/health', (req, res) => {
   const dbStateMap = {

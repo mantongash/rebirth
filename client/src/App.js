@@ -94,6 +94,7 @@ import Blog from './pages/Blog';
 import Resources from './pages/Resources';
 import FAQ from './pages/FAQ';
 import Support from './pages/Support';
+import Gallery from './pages/Gallery';
 
 // Admin pages
 import AdminLogin from './pages/AdminLogin';
@@ -110,6 +111,7 @@ import AdminSettings from './pages/AdminSettings';
 import AdminProfile from './pages/AdminProfile';
 import AdminAnnouncements from './pages/AdminAnnouncements';
 import AdminProducts from './pages/AdminProducts';
+import AdminGallery from './pages/AdminGallery';
 import AdminOrders from './pages/AdminOrders';
 import AdminShopSettings from './pages/AdminShopSettings';
 import AdminSubscribers from './pages/AdminSubscribers';
@@ -229,6 +231,7 @@ function AppContent() {
             <Route path="/resources" element={<Layout><Resources /></Layout>} />
             <Route path="/faq" element={<Layout><FAQ /></Layout>} />
             <Route path="/support" element={<Layout><Support /></Layout>} />
+            <Route path="/gallery" element={<Layout><Gallery /></Layout>} />
             
             {/* Admin Routes */}
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -327,6 +330,13 @@ function AppContent() {
               <AdminPrivateRoute>
                 <AdminLayout>
                   <AdminProducts />
+                </AdminLayout>
+              </AdminPrivateRoute>
+            } />
+            <Route path="/admin/gallery" element={
+              <AdminPrivateRoute>
+                <AdminLayout>
+                  <AdminGallery />
                 </AdminLayout>
               </AdminPrivateRoute>
             } />

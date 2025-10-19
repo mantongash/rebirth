@@ -98,10 +98,19 @@ export const AdminAuthProvider = ({ children }) => {
   }, []);
 
   const adminLogout = React.useCallback(async () => {
+    // Show logout success message
+    const logoutMessage = '👋 Logged out successfully. Thank you for using the admin panel!';
+    
+    // Store logout message for display
+    sessionStorage.setItem('adminLogoutMessage', logoutMessage);
+    
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     setAdminUser(null);
     setIsAdmin(false);
+    
+    // Redirect to admin login with logout message
+    window.location.href = '/admin-login?logout=success';
   }, []);
 
   const getAdminToken = React.useCallback(() => localStorage.getItem('adminToken'), []);

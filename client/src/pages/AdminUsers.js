@@ -8,6 +8,8 @@ const Container = styled.div`
   padding: 0;
   max-width: 100%;
   width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 `;
 
 const Header = styled.div`
@@ -20,6 +22,7 @@ const Header = styled.div`
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width:80%
 `;
 
 const Title = styled.h1`
@@ -105,6 +108,7 @@ const UsersTable = styled.div`
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  width:100%
 `;
 
 const TableHeader = styled.div`
@@ -139,9 +143,8 @@ const TableRow = styled.div`
 `;
 
 const UserAvatar = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 100%;
+  border-radius: 100%;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   color: white;
   display: flex;
@@ -149,6 +152,7 @@ const UserAvatar = styled.div`
   justify-content: center;
   font-weight: 600;
   font-size: 0.9rem;
+  padding:1em
 `;
 
 const StatusBadge = styled.span`

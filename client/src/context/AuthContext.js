@@ -262,7 +262,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Show logout success message
+    const logoutMessage = '👋 Logged out successfully. Thank you for visiting Rebirth of a Queen!';
+    
+    // Store logout message for display
+    sessionStorage.setItem('userLogoutMessage', logoutMessage);
+    
     dispatch({ type: 'LOGOUT' });
+    
+    // Redirect to home with logout message
+    window.location.href = '/?logout=success';
   };
 
   const updateUser = (userData) => {

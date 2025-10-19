@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser, FaPhone, FaSpinner, FaCheck, FaTimes, FaShieldAlt, FaUserCheck, FaKey, FaExclamationTriangle, FaStar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 // Custom SVG Icons - Professional Size
 const GoogleIcon = () => (
@@ -184,30 +185,64 @@ const PasswordToggle = styled.button`
   }
 `;
 
-const SignupButton = styled.button`
+const SignupButton = styled(motion.button)`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 1.2rem 2rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+  position: relative;
+  overflow: hidden;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    box-shadow: 0 8px 32px rgba(40, 167, 69, 0.2);
+    
+    &:hover:not(:disabled) {
+      box-shadow: 0 12px 40px rgba(40, 167, 69, 0.4);
+    }
   }
 `;
 
@@ -223,16 +258,48 @@ const ErrorMessage = styled.div`
   gap: 0.5rem;
 `;
 
-const SuccessMessage = styled.div`
-  background: #efe;
-  color: #27ae60;
-  padding: 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  border: 1px solid #cfc;
+const SuccessMessage = styled(motion.div)`
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #c3e6cb;
+  font-size: 0.95rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(21, 87, 36, 0.15);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #28a745;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { width: 0; }
+    50% { width: 100%; }
+    100% { width: 0; }
+  }
 `;
 
 const Divider = styled.div`
@@ -643,6 +710,7 @@ const Signup = () => {
   const [currentStep, setCurrentStep] = useState(1);
 
   const { register } = useAuth();
+  const { showSuccess } = useNotification();
   const navigate = useNavigate();
 
   // Password strength calculation
@@ -795,10 +863,11 @@ const Signup = () => {
       const result = await register(userData);
       
       if (result.success) {
-        setSuccess('Account created successfully! Redirecting...');
+        setSuccess('🎉 Welcome to Rebirth of a Queen! Your account has been created successfully. Redirecting to your dashboard...');
+        showSuccess('Account Created!', 'Welcome to Rebirth of a Queen! Your account has been created successfully.', 4000);
         setTimeout(() => {
           navigate('/');
-        }, 2000);
+        }, 3000);
       } else {
         setError(result.message || 'Registration failed. Please try again.');
       }
@@ -869,13 +938,31 @@ const Signup = () => {
 
             {success && (
               <SuccessMessage
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                transition={{ 
+                  duration: 0.5,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20
+                }}
               >
-                <FaCheck />
-                {success}
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                  style={{ fontSize: '1.2rem' }}
+                >
+                  🎉
+                </motion.div>
+                <motion.span
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
+                  {success}
+                </motion.span>
               </SuccessMessage>
             )}
           </AnimatePresence>
@@ -1057,11 +1144,34 @@ const Signup = () => {
             </span>
           </TermsCheckbox>
 
-          <SignupButton type="submit" disabled={loading}>
+          <SignupButton 
+            type="submit" 
+            disabled={loading}
+            className={success ? 'success' : ''}
+            whileHover={!loading && !success ? { scale: 1.02 } : {}}
+            whileTap={!loading && !success ? { scale: 0.98 } : {}}
+          >
             {loading ? (
               <>
                 <LoadingSpinner />
                 Creating account...
+              </>
+            ) : success ? (
+              <>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                >
+                  🎉
+                </motion.div>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
+                  Account Created!
+                </motion.span>
               </>
             ) : (
               <>

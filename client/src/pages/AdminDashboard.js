@@ -33,6 +33,8 @@ const DashboardContainer = styled.div`
   padding: 0;
   max-width: 100%;
   width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 `;
 
 const StatsGrid = styled.div`

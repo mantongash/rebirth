@@ -10,9 +10,10 @@ import {
 } from 'react-icons/fa';
 
 const Container = styled.div`
-  padding: 0;
+  padding: 2rem;
   max-width: 100%;
   min-height: 100vh;
+  background: #f8f9fa;
 `;
 
 const Header = styled.div`
@@ -21,15 +22,15 @@ const Header = styled.div`
   align-items: center;
   margin-bottom: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
+  background: white;
+  border: 1px solid #e9ecef;
   border-radius: 16px;
-  backdrop-filter: blur(10px);
-  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: #2d3748;
 `;
 
 const Title = styled.h1`
-  color: white;
+  color: #2d3748;
   font-size: 1.8rem;
   font-weight: 800;
   display: flex;
@@ -54,15 +55,15 @@ const Button = styled.button`
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
-  background: ${props => props.variant === 'secondary' ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #667eea, #764ba2)'};
-  color: white;
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  background: ${props => props.variant === 'secondary' ? '#f8f9fa' : 'linear-gradient(135deg, #667eea, #764ba2)'};
+  color: ${props => props.variant === 'secondary' ? '#2d3748' : 'white'};
+  border: 1px solid ${props => props.variant === 'secondary' ? '#e9ecef' : 'transparent'};
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background: ${props => props.variant === 'secondary' ? 'rgba(255,255,255,0.2)' : 'linear-gradient(135deg, #5563c1, #6a4190)'};
+    background: ${props => props.variant === 'secondary' ? '#e9ecef' : 'linear-gradient(135deg, #5563c1, #6a4190)'};
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -71,24 +72,23 @@ const SearchBar = styled.div`
   gap: 1rem;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
+  background: white;
+  border: 1px solid #e9ecef;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const SearchInput = styled.input`
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: white;
+  color: #2d3748;
   font-size: 1rem;
-  backdrop-filter: blur(10px);
 
   &::placeholder {
-    color: rgba(255,255,255,0.7);
+    color: #6c757d;
   }
 
   &:focus {
@@ -100,12 +100,11 @@ const SearchInput = styled.input`
 
 const FilterSelect = styled.select`
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: white;
+  color: #2d3748;
   font-size: 1rem;
-  backdrop-filter: blur(10px);
 
   &:focus {
     outline: none;
@@ -113,18 +112,18 @@ const FilterSelect = styled.select`
   }
 
   option {
-    background: #1a1a1a;
-    color: white;
+    background: white;
+    color: #2d3748;
   }
 `;
 
 const OrdersTable = styled.div`
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
+  background: white;
+  border: 1px solid #e9ecef;
   border-radius: 16px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  color: white;
+  color: #2d3748;
 `;
 
 const TableHeader = styled.div`
@@ -132,10 +131,10 @@ const TableHeader = styled.div`
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
-  border-bottom: 2px solid rgba(255,255,255,0.2);
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
   font-weight: 700;
-  color: white;
+  color: #2d3748;
 `;
 
 const TableRow = styled.div`
@@ -143,12 +142,12 @@ const TableRow = styled.div`
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid #e9ecef;
   align-items: center;
   transition: background 0.3s ease;
 
   &:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: #f8f9fa;
   }
 
   &:last-child {
@@ -249,28 +248,46 @@ const ActionButton = styled.button`
   border-radius: 8px;
   background: ${props => {
     switch(props.variant) {
-      case 'view': return 'rgba(16, 185, 129, 0.2)';
-      case 'edit': return 'rgba(59, 130, 246, 0.2)';
-      case 'process': return 'rgba(139, 92, 246, 0.2)';
-      case 'ship': return 'rgba(16, 185, 129, 0.2)';
-      case 'cancel': return 'rgba(239, 68, 68, 0.2)';
-      default: return 'rgba(255,255,255,0.1)';
+      case 'view': return '#e6fffa';
+      case 'edit': return '#eff6ff';
+      case 'process': return '#f3e8ff';
+      case 'ship': return '#e6fffa';
+      case 'cancel': return '#fef2f2';
+      default: return '#f8f9fa';
     }
   }};
-  color: white;
+  color: ${props => {
+    switch(props.variant) {
+      case 'view': return '#10b981';
+      case 'edit': return '#3b82f6';
+      case 'process': return '#8b5cf6';
+      case 'ship': return '#10b981';
+      case 'cancel': return '#ef4444';
+      default: return '#6b7280';
+    }
+  }};
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid ${props => {
+    switch(props.variant) {
+      case 'view': return '#a7f3d0';
+      case 'edit': return '#bfdbfe';
+      case 'process': return '#ddd6fe';
+      case 'ship': return '#a7f3d0';
+      case 'cancel': return '#fecaca';
+      default: return '#e5e7eb';
+    }
+  }};
 
   &:hover {
     background: ${props => {
       switch(props.variant) {
-        case 'view': return 'rgba(16, 185, 129, 0.3)';
-        case 'edit': return 'rgba(59, 130, 246, 0.3)';
-        case 'process': return 'rgba(139, 92, 246, 0.3)';
-        case 'ship': return 'rgba(16, 185, 129, 0.3)';
-        case 'cancel': return 'rgba(239, 68, 68, 0.3)';
-        default: return 'rgba(255,255,255,0.2)';
+        case 'view': return '#d1fae5';
+        case 'edit': return '#dbeafe';
+        case 'process': return '#e9d5ff';
+        case 'ship': return '#d1fae5';
+        case 'cancel': return '#fee2e2';
+        default: return '#f3f4f6';
       }
     }};
     transform: scale(1.05);
@@ -292,16 +309,16 @@ const Modal = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  border: 1px solid rgba(255,255,255,0.2);
+  background: white;
+  border: 1px solid #e9ecef;
   border-radius: 16px;
   padding: 2rem;
   width: 90%;
   max-width: 900px;
   max-height: 80vh;
   overflow-y: auto;
-  backdrop-filter: blur(10px);
-  color: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  color: #2d3748;
 `;
 
 const ModalHeader = styled.div`
@@ -315,12 +332,13 @@ const ModalTitle = styled.h2`
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
+  color: #2d3748;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: white;
+  color: #6b7280;
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -328,7 +346,8 @@ const CloseButton = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(255,255,255,0.1);
+    background: #f3f4f6;
+    color: #374151;
   }
 `;
 
@@ -340,18 +359,17 @@ const Label = styled.label`
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: white;
+  color: #2d3748;
 `;
 
 const Input = styled.input`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: white;
+  color: #2d3748;
   font-size: 1rem;
-  backdrop-filter: blur(10px);
 
   &:focus {
     outline: none;
@@ -360,19 +378,18 @@ const Input = styled.input`
   }
 
   &::placeholder {
-    color: rgba(255,255,255,0.7);
+    color: #6c757d;
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: white;
+  color: #2d3748;
   font-size: 1rem;
-  backdrop-filter: blur(10px);
   resize: vertical;
   min-height: 100px;
 
@@ -383,19 +400,18 @@ const TextArea = styled.textarea`
   }
 
   &::placeholder {
-    color: rgba(255,255,255,0.7);
+    color: #6c757d;
   }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid #e9ecef;
   border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: white;
+  color: #2d3748;
   font-size: 1rem;
-  backdrop-filter: blur(10px);
 
   &:focus {
     outline: none;
@@ -403,8 +419,8 @@ const Select = styled.select`
   }
 
   option {
-    background: #1a1a1a;
-    color: white;
+    background: white;
+    color: #2d3748;
   }
 `;
 

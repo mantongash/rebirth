@@ -31,29 +31,24 @@ import Impact from './pages/Impact';
 import GetInvolved from './pages/GetInvolved';
 import Contact from './pages/Contact';
 import Mission from './pages/Mission';
-import Education from './pages/Education';
-import Fashion from './pages/Fashion';
-import Fitness from './pages/Fitness';
-import Leather from './pages/Leather';
-import Photography from './pages/Photography';
 import WhoWeAre from './pages/WhoWeAre';
 import Team from './pages/Team';
 import History from './pages/History';
 import Partners from './pages/Partners';
-import Volunteer from './pages/Volunteer';
 import Donate from './pages/Donate';
 
 // Program pages
-import SusanVillage from './pages/programs/SusanVillage';
-import Elimisha from './pages/programs/Elimisha';
-import AuthenticVoices from './pages/programs/AuthenticVoices';
-import VocationalTraining from './pages/programs/VocationalTraining';
-import VolunteerProgram from './pages/programs/Volunteer';
+import SusanVillage from './pages/SusanVillage';
+import ElimishaProgram from './pages/ElimishaProgram';
+import AuthenticVoices from './pages/AuthenticVoices';
+import VocationalTraining from './pages/VocationalTraining';
+import VolunteerProgram from './pages/VolunteerProgram';
 import Partner from './pages/Partner';
 import Careers from './pages/Careers';
 import ShopNaivas from './pages/ShopNaivas';
 import ProductDetail from './pages/ProductDetail';
-import Checkout from './pages/Checkout';
+import ProfessionalCheckout from './pages/ProfessionalCheckout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import OrderSuccess from './pages/OrderSuccess';
 import OrderPayment from './pages/OrderPayment';
 import OrderHistory from './pages/OrderHistory';
@@ -83,7 +78,6 @@ import Newsroom from './pages/Newsroom';
 
 // New pages for footer links
 import MissionVision from './pages/MissionVision';
-import Empowerment from './pages/Empowerment';
 import Shelter from './pages/Shelter';
 import Advocacy from './pages/Advocacy';
 import Sponsor from './pages/Sponsor';
@@ -150,7 +144,7 @@ function AppContent() {
             
             {/* Program Routes */}
             <Route path="/programs/susan-village" element={<Layout><SusanVillage /></Layout>} />
-            <Route path="/programs/elimisha" element={<Layout><Elimisha /></Layout>} />
+            <Route path="/programs/elimisha" element={<Layout><ElimishaProgram /></Layout>} />
             <Route path="/programs/authentic-voices" element={<Layout><AuthenticVoices /></Layout>} />
             <Route path="/programs/vocational-training" element={<Layout><VocationalTraining /></Layout>} />
             <Route path="/programs/volunteer" element={<Layout><VolunteerProgram /></Layout>} />
@@ -159,16 +153,11 @@ function AppContent() {
             <Route path="/get-involved" element={<Layout><GetInvolved /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/mission" element={<Layout><Mission /></Layout>} />
-            <Route path="/education" element={<Layout><Education /></Layout>} />
-            <Route path="/fashion" element={<Layout><Fashion /></Layout>} />
-            <Route path="/fitness" element={<Layout><Fitness /></Layout>} />
-            <Route path="/leather" element={<Layout><Leather /></Layout>} />
-            <Route path="/photography" element={<Layout><Photography /></Layout>} />
             <Route path="/who-we-are" element={<Layout><WhoWeAre /></Layout>} />
             <Route path="/team" element={<Layout><Team /></Layout>} />
             <Route path="/history" element={<Layout><History /></Layout>} />
             <Route path="/partners" element={<Layout><Partners /></Layout>} />
-            <Route path="/volunteer" element={<Layout><Volunteer /></Layout>} />
+            <Route path="/volunteer" element={<Layout><VolunteerProgram /></Layout>} />
             <Route path="/donate" element={<Layout><Donate /></Layout>} />
             <Route path="/partner" element={<Layout><Partner /></Layout>} />
             <Route path="/careers" element={<Layout><Careers /></Layout>} />
@@ -183,7 +172,8 @@ function AppContent() {
             <Route path="/settings" element={<Layout><Settings /></Layout>} />
             <Route path="/shop" element={<Layout><ShopNaivas /></Layout>} />
             <Route path="/product/:productId" element={<Layout><ProductDetail /></Layout>} />
-            <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+            <Route path="/checkout" element={<Layout><ProfessionalCheckout /></Layout>} />
+            <Route path="/order-confirmation/:orderId" element={<Layout><OrderConfirmation /></Layout>} />
             <Route path="/order-success" element={<Layout><OrderSuccess /></Layout>} />
             <Route path="/order/payment" element={<Layout><OrderPayment /></Layout>} />
             <Route path="/orders" element={<Layout><OrderHistory /></Layout>} />
@@ -220,7 +210,6 @@ function AppContent() {
             
             {/* New Footer Link Routes */}
             <Route path="/mission-vision" element={<Layout><MissionVision /></Layout>} />
-            <Route path="/empowerment" element={<Layout><Empowerment /></Layout>} />
             <Route path="/shelter" element={<Layout><Shelter /></Layout>} />
             <Route path="/advocacy" element={<Layout><Advocacy /></Layout>} />
             <Route path="/sponsor" element={<Layout><Sponsor /></Layout>} />

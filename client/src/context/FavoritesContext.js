@@ -9,10 +9,12 @@ const FavoritesContext = createContext();
 const getFavoritesStorageKey = (userId) => `favorites_${userId}`;
 const getGuestFavoritesStorageKey = () => 'favorites_guest';
 
-const isFavoritesDataExpired = (timestamp) => {
+const isFavoritesDataExpired = (timestamp, isGuest = false) => {
   const now = Date.now();
-  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds (like major e-commerce sites)
-  return (now - timestamp) > thirtyDaysInMs;
+  // Guest favorites expire in 2-3 days, user favorites in 7 days
+  const expiryDays = isGuest ? 2 : 7;
+  const expiryMs = expiryDays * 24 * 60 * 60 * 1000;
+  return (now - timestamp) > expiryMs;
 };
 
 // Persisted clear flag helpers (prevents future re-sync)
@@ -55,8 +57,9 @@ const loadFavoritesFromLocalStorage = (userId) => {
     if (savedData) {
       const parsed = JSON.parse(savedData);
       
-      // Check if data is expired
-      if (isFavoritesDataExpired(parsed.timestamp)) {
+      // Check if data is expired (guest favorites expire faster)
+      const isGuest = !userId;
+      if (isFavoritesDataExpired(parsed.timestamp, isGuest)) {
         localStorage.removeItem(storageKey);
         return [];
       }
@@ -191,7 +194,7 @@ export const FavoritesProvider = ({ children }) => {
                     }
                   }
                   clearUserFavoritesFromStorage(null);
-                  showSuccess('Synced your favorites', { duration: 3000 });
+                  showSuccess('Favorites Synced', 'Your guest favorites have been synced to your account');
                   // Reload server favorites after merge
                   const response2 = await API_MAIN.get('/auth/favorites');
                   if (response2.data.success) {

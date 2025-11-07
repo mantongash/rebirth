@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCheck, FaExclamationTriangle, FaInfo, FaTimes } from 'react-icons/fa';
@@ -18,7 +18,7 @@ const NotificationContainer = styled(motion.div)`
   position: fixed;
   top: 2rem;
   right: 2rem;
-  z-index: 9999;
+  z-index: 100000;
   max-width: 400px;
   width: 100%;
   pointer-events: none;
@@ -27,45 +27,46 @@ const NotificationContainer = styled(motion.div)`
 const NotificationCard = styled(motion.div)`
   background: ${props => {
     switch(props.type) {
-      case 'success': return 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)';
-      case 'error': return 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)';
-      case 'warning': return 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)';
-      case 'info': return 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)';
-      default: return 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)';
+      case 'success': return 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+      case 'error': return 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
+      case 'warning': return 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)';
+      case 'info': return 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+      default: return 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
     }
   }};
   color: ${props => {
     switch(props.type) {
-      case 'success': return '#155724';
-      case 'error': return '#721c24';
-      case 'warning': return '#856404';
-      case 'info': return '#0c5460';
-      default: return '#1565c0';
+      case 'success': return '#065f46';
+      case 'error': return '#991b1b';
+      case 'warning': return '#92400e';
+      case 'info': return '#1e40af';
+      default: return '#374151';
     }
   }};
-  padding: 1.5rem 2rem;
-  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
   border: 1px solid ${props => {
     switch(props.type) {
-      case 'success': return '#c3e6cb';
-      case 'error': return '#f5c6cb';
-      case 'warning': return '#ffeaa7';
-      case 'info': return '#bee5eb';
-      default: return '#90caf9';
+      case 'success': return '#a7f3d0';
+      case 'error': return '#fecaca';
+      case 'warning': return '#fde68a';
+      case 'info': return '#bfdbfe';
+      default: return '#e5e7eb';
     }
   }};
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  align-items: flex-start;
+  gap: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
+  margin-bottom: 0.75rem;
   pointer-events: auto;
   cursor: pointer;
+  min-height: 60px;
 
   &::before {
     content: '';
@@ -109,16 +110,24 @@ const NotificationCard = styled(motion.div)`
 `;
 
 const NotificationIcon = styled(motion.div)`
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  backdrop-filter: blur(5px);
+  width: 32px;
+  height: 32px;
+  background: ${props => {
+    switch(props.type) {
+      case 'success': return 'rgba(16, 185, 129, 0.1)';
+      case 'error': return 'rgba(239, 68, 68, 0.1)';
+      case 'warning': return 'rgba(245, 158, 11, 0.1)';
+      case 'info': return 'rgba(59, 130, 246, 0.1)';
+      default: return 'rgba(107, 114, 128, 0.1)';
+    }
+  }};
+  border-radius: 8px;
   flex-shrink: 0;
+  margin-top: 2px;
 `;
 
 const NotificationContent = styled.div`
@@ -127,40 +136,60 @@ const NotificationContent = styled.div`
 `;
 
 const NotificationTitle = styled.h4`
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
+  color: ${props => {
+    switch(props.type) {
+      case 'success': return '#047857';
+      case 'error': return '#dc2626';
+      case 'warning': return '#d97706';
+      case 'info': return '#2563eb';
+      default: return '#374151';
+    }
+  }};
 `;
 
 const NotificationMessage = styled.p`
   margin: 0;
-  font-size: 0.9rem;
-  opacity: 0.9;
+  font-size: 0.8125rem;
+  opacity: 0.8;
   line-height: 1.4;
   word-wrap: break-word;
+  color: ${props => {
+    switch(props.type) {
+      case 'success': return '#065f46';
+      case 'error': return '#991b1b';
+      case 'warning': return '#92400e';
+      case 'info': return '#1e40af';
+      default: return '#6b7280';
+    }
+  }};
 `;
 
 const CloseButton = styled(motion.button)`
   background: none;
   border: none;
-  color: inherit;
-  font-size: 1.2rem;
+  color: #9ca3af;
+  font-size: 1rem;
   cursor: pointer;
   padding: 0.25rem;
-  border-radius: 50%;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.6;
   transition: all 0.2s ease;
+  margin-top: 2px;
 
   &:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.05);
+    color: #6b7280;
   }
 `;
 
@@ -168,33 +197,72 @@ const ProgressBar = styled(motion.div)`
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: 2px;
   background: ${props => {
     switch(props.type) {
-      case 'success': return '#28a745';
-      case 'error': return '#dc3545';
-      case 'warning': return '#ffc107';
-      case 'info': return '#17a2b8';
-      default: return '#2196f3';
+      case 'success': return '#10b981';
+      case 'error': return '#ef4444';
+      case 'warning': return '#f59e0b';
+      case 'info': return '#3b82f6';
+      default: return '#6b7280';
     }
   }};
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 12px 12px;
 `;
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
+  const lastShownRef = useRef({}); // key -> timestamp
+  const lastTypeTimestampRef = useRef({}); // type -> timestamp
 
-  const addNotification = useCallback((type, title, message, duration = 5000) => {
-    const id = Date.now() + Math.random();
-    const notification = { id, type, title, message, duration };
-    
-    setNotifications(prev => [...prev, notification]);
-    
+  const DEDUP_WINDOW_MS = 2500; // ignore identical messages shown in the last 2.5s
+  const TYPE_THROTTLE_MS = 1200; // at most one per type every 1.2s
+
+  const addNotification = useCallback((type, title, message, duration = 3000) => {
+    const now = Date.now();
+
+    // Normalize content for dedup
+    const normTitle = (title || '').trim();
+    const normMessage = (message || '').trim();
+    const key = `${type}|${normTitle}|${normMessage}`;
+
+    // Type throttling (e.g., too many success toasts back-to-back)
+    const lastTypeTs = lastTypeTimestampRef.current[type] || 0;
+    if (now - lastTypeTs < TYPE_THROTTLE_MS) {
+      return; // drop
+    }
+
+    // De-duplicate identical notifications within a short window
+    const lastTs = lastShownRef.current[key] || 0;
+    if (now - lastTs < DEDUP_WINDOW_MS) {
+      return; // drop duplicate
+    }
+
+    // If an identical notification is currently visible, drop it
+    let shouldDrop = false;
+    setNotifications(prev => {
+      if (prev.some(n => n.type === type && n.title === normTitle && n.message === normMessage)) {
+        shouldDrop = true;
+        return prev;
+      }
+      const id = now + Math.random();
+      const notification = { id, type, title: normTitle, message: normMessage, duration };
+      const newNotifications = [...prev, notification];
+      lastShownRef.current[key] = now;
+      lastTypeTimestampRef.current[type] = now;
+      return newNotifications.length > 3 ? newNotifications.slice(-3) : newNotifications;
+    });
+
+    if (shouldDrop) return;
+
     // Auto remove after duration
     if (duration > 0) {
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(notif => notif.id !== id));
+      const removeAt = setTimeout(() => {
+        setNotifications(prev => prev.filter(notif => {
+          return !(notif.type === type && notif.title === normTitle && notif.message === normMessage);
+        }));
       }, duration);
+      // No need to track timer id; auto GC is fine here
     }
   }, []);
 
@@ -252,31 +320,32 @@ export const NotificationProvider = ({ children }) => {
       <NotificationContainer>
         <AnimatePresence>
       {notifications.map((notification) => (
-            <NotificationCard
+        <NotificationCard
           key={notification.id}
-              type={notification.type}
-              initial={{ opacity: 0, x: 400, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 400, scale: 0.8 }}
-              transition={{ 
-                duration: 0.5,
-                type: "spring",
-                stiffness: 300,
-                damping: 25
-              }}
-              onClick={() => removeNotification(notification.id)}
-            >
+          type={notification.type}
+          initial={{ opacity: 0, x: 300, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 300, scale: 0.95 }}
+          transition={{ 
+            duration: 0.4,
+            type: "spring",
+            stiffness: 400,
+            damping: 30
+          }}
+          onClick={() => removeNotification(notification.id)}
+        >
               <NotificationIcon
-                initial={{ scale: 0, rotate: -180 }}
+                type={notification.type}
+                initial={{ scale: 0, rotate: -90 }}
                 animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
+                transition={{ delay: 0.1, duration: 0.3, type: "spring", stiffness: 500 }}
               >
                 {getIcon(notification.type)}
               </NotificationIcon>
               
               <NotificationContent>
-                <NotificationTitle>{notification.title}</NotificationTitle>
-                <NotificationMessage>{notification.message}</NotificationMessage>
+                <NotificationTitle type={notification.type}>{notification.title}</NotificationTitle>
+                <NotificationMessage type={notification.type}>{notification.message}</NotificationMessage>
               </NotificationContent>
 
               <CloseButton
@@ -291,12 +360,12 @@ export const NotificationProvider = ({ children }) => {
               </CloseButton>
 
               {notification.duration > 0 && (
-                <ProgressBar
-                  type={notification.type}
-                  initial={{ width: "100%" }}
-                  animate={{ width: "0%" }}
-                  transition={{ duration: notification.duration / 1000, ease: "linear" }}
-                />
+              <ProgressBar
+                type={notification.type}
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: notification.duration / 1000, ease: "easeOut" }}
+              />
               )}
             </NotificationCard>
           ))}

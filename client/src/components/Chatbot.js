@@ -478,7 +478,7 @@ const Chatbot = () => {
         "Contact us"
       ]);
     } else if (lowerInput.includes('contact') || lowerInput.includes('phone') || lowerInput.includes('email') || lowerInput.includes('address')) {
-      addBotMessage(type, "Here's how to reach us: 📞\n\n📱 Phone: +254 700 000 000\n📧 Email: info@rebirthofaqueen.org\n📍 Address: Nairobi, Kenya\n\nWe're here to help! What would you like to know?", [
+      addBotMessage(type, "Here's how to reach us: 📞\n\n📱 Phone: +254 720 339 204\n📧 Email: info@rebirthofaqueen.org\n📍 Address: Nairobi, Kenya\n\nWe're here to help! What would you like to know?", [
         "Call us now",
         "Send email",
         "Visit our location",

@@ -30,12 +30,12 @@ const ProfileButton = styled.button`
   }
 `;
 
-// Profile Avatar
+// Profile Avatar - Professional with social login support
 const ProfileAvatar = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: ${props => props.$hasImage ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
   color: white;
   display: flex;
   align-items: center;
@@ -46,26 +46,25 @@ const ProfileAvatar = styled.div`
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   transition: all 0.2s ease;
+  overflow: hidden;
+  border: 2px solid #fff;
   
   &:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
 `;
 
-// User Name
+// User Name - Hidden for professional look (only show avatar)
 const UserName = styled.span`
-  font-weight: 500;
-  font-size: 14px;
-  color: #333;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  
-  @media (max-width: 768px) {
-    display: none;
-  }
+  display: none; /* Professional: Only show avatar, no name in navbar */
 `;
 
 // Dropdown Arrow
@@ -86,17 +85,41 @@ const DropdownMenu = styled(motion.div)`
   right: 0;
   background: white;
   border: 1px solid #e5e5e5;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  padding: 8px 0;
-  min-width: 200px;
+  padding: 12px 0;
+  min-width: 220px;
   z-index: 1000;
   margin-top: 8px;
   
   @media (max-width: 768px) {
     right: -10px;
-    min-width: 180px;
+    min-width: 200px;
   }
+`;
+
+// User Info Header
+const UserInfoHeader = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+`;
+
+// User Info Name
+const UserInfoName = styled.div`
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 2px;
+`;
+
+// User Info Email
+const UserInfoEmail = styled.div`
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 // Dropdown Item
@@ -173,6 +196,23 @@ const UserProfile = ({ user, onLogout }) => {
     return 'U';
   };
 
+  // Get user avatar (social login or profile picture)
+  const getUserAvatar = (user) => {
+    if (!user) return null;
+    
+    // Check for social login profile pictures
+    if (user.profilePicture) {
+      return user.profilePicture;
+    }
+    
+    // Check for Google OAuth profile picture
+    if (user.googleId && user.profilePicture) {
+      return user.profilePicture;
+    }
+    
+    return null;
+  };
+
   // Get display name
   const getDisplayName = (user) => {
     if (!user) return 'User';
@@ -220,18 +260,25 @@ const UserProfile = ({ user, onLogout }) => {
   };
 
   const userInitials = getUserInitials(user);
+  const userAvatar = getUserAvatar(user);
   const displayName = getDisplayName(user);
+  const hasAvatar = !!userAvatar;
   
   // Debug logging
   console.log('UserProfile received user:', user);
   console.log('User initials:', userInitials);
-  console.log('Display name:', displayName);
+  console.log('User avatar:', userAvatar);
+  console.log('Has avatar:', hasAvatar);
 
   return (
     <UserProfileContainer ref={dropdownRef}>
       <ProfileButton onClick={() => setIsOpen(!isOpen)}>
-        <ProfileAvatar>
-          {userInitials}
+        <ProfileAvatar $hasImage={hasAvatar}>
+          {hasAvatar ? (
+            <img src={userAvatar} alt={displayName} />
+          ) : (
+            userInitials
+          )}
         </ProfileAvatar>
         <UserName>{displayName}</UserName>
         <DropdownArrow $open={isOpen}>
@@ -247,6 +294,10 @@ const UserProfile = ({ user, onLogout }) => {
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
+            <UserInfoHeader>
+              <UserInfoName>{displayName}</UserInfoName>
+              <UserInfoEmail>{user?.email || 'No email'}</UserInfoEmail>
+            </UserInfoHeader>
             <DropdownItem to="/profile">
               <FaUser />
               My Profile

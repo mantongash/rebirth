@@ -227,7 +227,7 @@ const ProductDetail = () => {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}>
               <FaPhone style={{ color: "#3498db" }} />
-              <span>+254 700 000 000</span>
+              <span>+254 720 339 204</span>
             </div>
           </div>
         </div>

@@ -225,7 +225,7 @@ Thank you for your order!
           <div style={{ color: '#2c3e50', fontSize: '14px', lineHeight: '1.6' }}>
             <p style={{ margin: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FaPhone style={{ color: '#3498db' }} />
-              <span>+254 700 000 000</span>
+              <span>+254 720 339 204</span>
             </p>
             <p style={{ margin: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FaEnvelope style={{ color: '#3498db' }} />

@@ -9,10 +9,12 @@ const CartContext = createContext();
 const getStorageKey = (userId) => `cart_${userId}`;
 const getGuestStorageKey = () => 'cart_guest';
 
-const isDataExpired = (timestamp) => {
+const isDataExpired = (timestamp, isGuest = false) => {
   const now = Date.now();
-  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds (like major e-commerce sites)
-  return (now - timestamp) > thirtyDaysInMs;
+  // Guest carts expire in 2-3 days, user carts in 7 days
+  const expiryDays = isGuest ? 2 : 7;
+  const expiryMs = expiryDays * 24 * 60 * 60 * 1000;
+  return (now - timestamp) > expiryMs;
 };
 
 // Persisted clear flag helpers (prevents future re-sync)
@@ -21,7 +23,7 @@ const getClearedFlagFromLocal = (key) => {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 days for professional cart expiry
     const expired = (Date.now() - parsed.timestamp) > sevenDaysInMs;
     if (expired) {
       localStorage.removeItem(key);
@@ -55,8 +57,9 @@ const loadFromLocalStorage = (userId) => {
     if (savedData) {
       const parsed = JSON.parse(savedData);
       
-      // Check if data is expired
-      if (isDataExpired(parsed.timestamp)) {
+      // Check if data is expired (guest carts expire faster)
+      const isGuest = !userId;
+      if (isDataExpired(parsed.timestamp, isGuest)) {
         localStorage.removeItem(storageKey);
         return [];
       }
@@ -202,7 +205,7 @@ export const CartProvider = ({ children }) => {
                   }
                   // Clear guest storage after merge
                   clearUserCartFromStorage(null);
-                  showSuccess('Synced your cart', { duration: 3000 });
+                  showSuccess('Cart Synced', 'Your guest cart has been synced to your account');
                   // Reload server cart after merge
                   const res2 = await API_MAIN.get('/auth/cart');
                   if (res2.data?.success) {
@@ -260,13 +263,17 @@ export const CartProvider = ({ children }) => {
         await API_MAIN.post('/auth/cart/add', { productId: product._id, quantity });
       } catch (_) { /* best-effort */ }
     }
+    showSuccess('Added to Cart', 'Item successfully added to your cart');
   };
 
   const removeFromCart = async (productId) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
     if (isAuthenticated) {
-      try { await API_MAIN.delete(`/auth/cart/remove/${productId}`); } catch (_) {}
+      try { 
+        await API_MAIN.delete(`/auth/cart/remove/${productId}`);
+      } catch (_) {}
     }
+    showSuccess('Removed from Cart', 'Item has been removed from your cart');
   };
 
   const updateQuantity = async (productId, quantity) => {
@@ -279,8 +286,11 @@ export const CartProvider = ({ children }) => {
         payload: { productId, quantity }
       });
       if (isAuthenticated) {
-        try { await API_MAIN.put('/auth/cart/update', { productId, quantity }); } catch (_) {}
+        try { 
+          await API_MAIN.put('/auth/cart/update', { productId, quantity });
+        } catch (_) {}
       }
+      showSuccess('Cart Updated', 'Your cart has been updated');
     }
   };
 

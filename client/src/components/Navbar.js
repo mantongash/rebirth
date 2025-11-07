@@ -301,9 +301,10 @@ const NavbarContainer = styled.nav`
   border-bottom: 1px solid #e5e5e5;
   position: sticky;
   top: 0;
-  z-index: 3000;
+  z-index: 99999;
   width: 100%;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  isolation: isolate;
 `;
 
 const NavbarContent = styled.div`
@@ -316,7 +317,7 @@ const NavbarContent = styled.div`
   height: 70px;
   position: relative;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
 
   @media (max-width: 768px) {
     padding: 0 16px;
@@ -377,6 +378,7 @@ const NavLinks = styled.div`
   flex: 1;
   max-width: 600px;
   justify-content: center;
+  overflow: visible;
 
   @media (max-width: 768px) {
     display: none;
@@ -385,6 +387,8 @@ const NavLinks = styled.div`
 
 const NavLinkItem = styled.div`
   position: relative;
+  z-index: 99997;
+  overflow: visible;
 `;
 
 const NavLinkStyled = styled(Link)`
@@ -442,12 +446,12 @@ const DropdownToggle = styled.button`
   white-space: nowrap;
   border-radius: 4px;
   flex-shrink: 0;
-  z-index: 1000;
+  z-index: 99998;
 
   &:hover {
     color: #e74c3c;
     background: #f8f9fa;
-      z-index: 1000;
+      z-index: 99998;
 
   }
 
@@ -464,7 +468,7 @@ const DropdownToggle = styled.button`
       right: 0;
       height: 2px;
       background: #e74c3c;
-        z-index: 1000;
+        z-index: 99998;
 
     }
   `}
@@ -486,20 +490,21 @@ const DropdownArrow = styled.span`
 
 const DropdownMenu = styled.div`
   position: absolute;
-  top: calc(100% - 2px);
-  left: -15px;
+  top: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
   background: white;
   border: 1px solid #e5e5e5;
   border-radius: 6px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   padding: 16px;
   min-width: 280px;
-  z-index: 4000;
+  z-index: 99999;
   margin-top: 0;
   opacity: ${props => props.$open ? 1 : 0};
   visibility: ${props => props.$open ? 'visible' : 'hidden'};
-  transform: translateY(${props => props.$open ? '0' : '-10px'});
   transition: all 0.2s ease;
+  pointer-events: ${props => props.$open ? 'auto' : 'none'};
 
   @media (max-width: 768px) {
     left: 0;
@@ -517,7 +522,7 @@ const DropdownItem = styled(Link)`
   font-size: 14px;
   border-radius: 8px;
   transition: background-color 0.2s, color 0.2s;
-    z-index: 1000;
+    z-index: 99999;
 
 
   &:hover {
@@ -563,26 +568,51 @@ const DesktopOnlyActions = styled.div`
 `;
 
 const DonateButton = styled(Link)`
-  background: #e74c3c;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 25px;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 12px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.2s;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
 
   &:hover {
-    background: #c0392b;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
   }
 
   svg {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   @media (max-width: 768px) {
@@ -592,19 +622,44 @@ const DonateButton = styled(Link)`
 
 
 const LoginButton = styled(Link)`
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 25px;
   font-weight: 600;
-  font-size: 11px;
-  transition: all 0.2s;
+  font-size: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
 
   &:hover {
-    background: #5a6fd8;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   }
 
   @media (max-width: 768px) {
@@ -616,14 +671,24 @@ const CartIconButton = styled(Link)`
   position: relative;
   display: flex;
   align-items: center;
-  margin-left: 6px;
+  margin-left: 8px;
   color: #f68b1e;
   font-size: 18px;
-  background: none;
-  border: none;
+  background: rgba(246, 139, 30, 0.1);
+  border: 1px solid rgba(246, 139, 30, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  justify-content: center;
+  
   &:hover {
     color: #e67e22;
+    background: rgba(246, 139, 30, 0.15);
+    border-color: rgba(246, 139, 30, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(246, 139, 30, 0.2);
   }
 `;
 
@@ -631,14 +696,24 @@ const FavoritesIconButton = styled(Link)`
   position: relative;
   display: flex;
   align-items: center;
-  margin-left: 4px;
+  margin-left: 6px;
   color: #e74c3c;
   font-size: 18px;
-  background: none;
-  border: none;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  justify-content: center;
+  
   &:hover {
     color: #c0392b;
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
   }
 
   @media (max-width: 768px) {
@@ -648,18 +723,33 @@ const FavoritesIconButton = styled(Link)`
 
 const CartBadge = styled.span`
   position: absolute;
-  top: -6px;
-  right: -10px;
-  background: #f68b1e;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #f68b1e 0%, #e67e22 100%);
   color: white;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: bold;
+  box-shadow: 0 2px 6px rgba(246, 139, 30, 0.4);
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
 `;
 
 function useOutsideClick(ref, handler) {
@@ -746,6 +836,7 @@ const Navbar = () => {
     alt="Rebirth of a Queen Logo" 
   />
 </Logo>
+
 
         <NavLinks>
           {navLinks.map((link) => {

@@ -464,11 +464,11 @@ const AdminBulkSMS = () => {
   });
   
   const [recipients, setRecipients] = useState([
-    { id: 1, name: 'Alice Johnson', phone: '+254712345678', email: 'alice@example.com' },
-    { id: 2, name: 'Bob Smith', phone: '+254723456789', email: 'bob@example.com' },
-    { id: 3, name: 'Carol Davis', phone: '+254734567890', email: 'carol@example.com' },
-    { id: 4, name: 'David Wilson', phone: '+254745678901', email: 'david@example.com' },
-    { id: 5, name: 'Eva Brown', phone: '+254756789012', email: 'eva@example.com' }
+    { id: 1, name: 'Alice Johnson', phone: '+254720339204', email: 'alice@example.com' },
+    { id: 2, name: 'Bob Smith', phone: '+254720339204', email: 'bob@example.com' },
+    { id: 3, name: 'Carol Davis', phone: '+254720339204', email: 'carol@example.com' },
+    { id: 4, name: 'David Wilson', phone: '+254720339204', email: 'david@example.com' },
+    { id: 5, name: 'Eva Brown', phone: '+254720339204', email: 'eva@example.com' }
   ]);
   
   const [selectedRecipients, setSelectedRecipients] = useState([]);

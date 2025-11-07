@@ -141,6 +141,12 @@ const userSchema = new mongoose.Schema({
     }
   }],
   
+  // Cart expiry tracking for professional persistent cart system
+  cartLastActivity: {
+    type: Date,
+    default: null
+  },
+  
   favorites: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,
@@ -152,6 +158,12 @@ const userSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  
+  // Favorites expiry tracking for professional persistent favorites system
+  favoritesLastActivity: {
+    type: Date,
+    default: null
+  },
   
   // Order history
   orders: [{
@@ -224,12 +236,13 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Add to cart method
+// Add to cart method with activity tracking
 userSchema.methods.addToCart = function(productId, quantity = 1) {
   const existingItem = this.cart.find(item => item.product.toString() === productId.toString());
   
   if (existingItem) {
     existingItem.quantity += quantity;
+    existingItem.addedAt = new Date(); // Reset timestamp on activity
   } else {
     this.cart.push({
       product: productId,
@@ -237,6 +250,9 @@ userSchema.methods.addToCart = function(productId, quantity = 1) {
       addedAt: new Date()
     });
   }
+  
+  // Update cart last activity timestamp (resets 7-day expiry)
+  this.cartLastActivity = new Date();
   
   return this.save();
 };
@@ -247,7 +263,7 @@ userSchema.methods.removeFromCart = function(productId) {
   return this.save();
 };
 
-// Update cart quantity method
+// Update cart quantity method with activity tracking
 userSchema.methods.updateCartQuantity = function(productId, quantity) {
   const item = this.cart.find(item => item.product.toString() === productId.toString());
   if (item) {
@@ -255,6 +271,9 @@ userSchema.methods.updateCartQuantity = function(productId, quantity) {
       this.removeFromCart(productId);
     } else {
       item.quantity = quantity;
+      item.addedAt = new Date(); // Reset timestamp on activity
+      // Update cart last activity timestamp (resets 7-day expiry)
+      this.cartLastActivity = new Date();
     }
   }
   return this.save();
@@ -272,7 +291,7 @@ userSchema.methods.clearFavorites = function() {
   return this.save();
 };
 
-// Add to favorites method
+// Add to favorites method with activity tracking
 userSchema.methods.addToFavorites = function(productId) {
   const exists = this.favorites.some(fav => fav.product.toString() === productId.toString());
   if (!exists) {
@@ -280,13 +299,17 @@ userSchema.methods.addToFavorites = function(productId) {
       product: productId,
       addedAt: new Date()
     });
+    // Update favorites last activity timestamp (resets 7-day expiry)
+    this.favoritesLastActivity = new Date();
   }
   return this.save();
 };
 
-// Remove from favorites method
+// Remove from favorites method with activity tracking
 userSchema.methods.removeFromFavorites = function(productId) {
   this.favorites = this.favorites.filter(fav => fav.product.toString() !== productId.toString());
+  // Update favorites last activity timestamp (resets 7-day expiry)
+  this.favoritesLastActivity = new Date();
   return this.save();
 };
 

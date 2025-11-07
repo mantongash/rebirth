@@ -93,10 +93,7 @@ const HeroBg = styled.div`
   }
   
   /* Fallback background image */
-  background-image: url('https://res.cloudinary.com/samokello/image/upload/v1758121594/rebirth-of-a-queen/images/orientation1_j9fvmd.jpg');
-  background-size: cover;
-  background-position: 50% 20%;
-  background-repeat: no-repeat;
+  /* Removed to prevent image flash during reload */
 `;
 
 const HeroVideo = styled.video`
@@ -128,36 +125,38 @@ const AudioControlButton = styled(motion.button)`
   top: 2rem;
   right: 2rem;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.9) 0%, rgba(192, 57, 43, 0.9) 100%);
+  border: 3px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   
   &:hover {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
+    background: linear-gradient(135deg, rgba(231, 76, 60, 1) 0%, rgba(192, 57, 43, 1) 100%);
+    border-color: rgba(255, 255, 255, 1);
+    transform: scale(1.15);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
   }
   
   &:active {
-    transform: scale(0.95);
+    transform: scale(1.05);
   }
   
   @media (max-width: 768px) {
     top: 1rem;
     right: 1rem;
-    width: 45px;
-    height: 45px;
-    font-size: 1rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
   }
 `;
 
@@ -1640,7 +1639,7 @@ const Home = () => {
           <HeroVideo 
             ref={setVideoRef}
             autoPlay 
-            muted 
+            muted
             loop 
             playsInline
             preload="metadata"
@@ -1655,11 +1654,20 @@ const Home = () => {
           </HeroVideo>
           <AudioControlButton
             onClick={toggleAudio}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 1.05 }}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              rotate: [0, -5, 5, 0]
+            }}
+            transition={{ 
+              delay: 0.5, 
+              duration: 0.6,
+              rotate: { delay: 2, duration: 0.5 }
+            }}
+            title={isMuted ? "Unmute video" : "Mute video"}
           >
             {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
           </AudioControlButton>

@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const connectDB = require('./config/db');
 const passport = require('./config/passport');
+const cartCleanupService = require('./services/cartCleanupService');
 const donationRoutes = require('./routes/donations');
 const mpesaRoutes = require('./routes/mpesa');
 const paypalRoutes = require('./routes/paypal');
@@ -287,4 +288,8 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
+  
+  // Start cart cleanup service for professional cart management
+  cartCleanupService.start();
+  console.log('🧹 Cart cleanup service started - expired carts will be cleaned every 24 hours');
 }); 

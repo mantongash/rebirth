@@ -504,6 +504,24 @@ const CancelButton = styled.button`
   &:hover { background: #e9ecef; }
 `;
 
+const CartExpiryNotice = styled.div`
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 24px;
+  font-size: 0.9rem;
+  color: #856404;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ExpiryIcon = styled.div`
+  color: #f39c12;
+  font-size: 1.1rem;
+`;
+
 const ShoppingCart = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
@@ -511,6 +529,7 @@ const ShoppingCart = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem })
   const [coupon, setCoupon] = useState('');
   const [couponStatus, setCouponStatus] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
+  const [cartExpiry, setCartExpiry] = useState(null);
   const cartContentRef = useRef(null);
 
   // Accessibility: focus trap
@@ -604,7 +623,18 @@ const ShoppingCart = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem })
               </ContinueShoppingButton>
             </EmptyCart>
           ) : (
-            cart.map(item => (
+            <>
+              {/* Cart Expiry Notice */}
+              {cartExpiry && (
+                <CartExpiryNotice>
+                  <ExpiryIcon>⏰</ExpiryIcon>
+                  <div>
+                    <strong>Cart Expiry Notice:</strong> Your cart will expire in {cartExpiry} days. 
+                    Items are automatically saved for 7 days after your last activity.
+                  </div>
+                </CartExpiryNotice>
+              )}
+              {cart.map(item => (
               <CartItem key={item.id}>
                 <ItemImage src={item.image} alt={item.name} />
                 <ItemInfo>
@@ -642,7 +672,8 @@ const ShoppingCart = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem })
                   <FaTrash />
                 </RemoveButton>
               </CartItem>
-            ))
+              ))}
+            </>
           )}
         </CartContent>
 

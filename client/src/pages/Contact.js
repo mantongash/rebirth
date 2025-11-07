@@ -510,15 +510,15 @@ export default function Contact() {
       icon: <FaPhone />,
       title: "Phone",
       text: "Main Office",
-      link: "+254 700 000 000",
-      href: "tel:+254700000000",
-      secondary: "+254 711 000 000"
+      link: "+254 720 339 204",
+      href: "tel:+254720339204",
+      secondary: "+254 720 339 204"
     },
     {
       icon: <FaWhatsapp />,
       title: "WhatsApp",
       text: "Quick Support",
-      link: "+254 700 000 000",
+      link: "+254 720 339 204",
       href: "https://wa.me/254700000000"
     },
     {
@@ -846,7 +846,7 @@ export default function Contact() {
                 <QuickTitle>Call Us</QuickTitle>
                 <QuickText>Speak directly with our team for immediate assistance and detailed information.</QuickText>
                 <QuickButton
-                  href="tel:+254700000000"
+                  href="tel:+254720339204"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >

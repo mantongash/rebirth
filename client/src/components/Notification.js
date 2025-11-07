@@ -123,7 +123,7 @@ const Notification = ({
         style={{
           position: 'fixed',
           ...positionStyle,
-          zIndex: 10000,
+          zIndex: 100000,
           minWidth: '320px',
           maxWidth: '400px',
           backgroundColor: 'white',

@@ -153,8 +153,8 @@ const AdminShopSettings = () => {
     taxRate: 16,
     
     // Contact Information
-    whatsappNumber: '+254 700 000 000',
-    phoneNumber: '+254 700 000 000',
+    whatsappNumber: '+254 720 339 204',
+    phoneNumber: '+254 720 339 204',
     email: 'shop@rebirthofaqueen.org',
     
     // Payment Settings
@@ -270,7 +270,7 @@ const AdminShopSettings = () => {
               name="whatsappNumber"
               value={settings.whatsappNumber}
               onChange={handleInputChange}
-              placeholder="+254 700 000 000"
+              placeholder="+254 720 339 204"
             />
             <InfoText>This number will be used for order notifications</InfoText>
           </FormGroup>
@@ -282,7 +282,7 @@ const AdminShopSettings = () => {
               name="phoneNumber"
               value={settings.phoneNumber}
               onChange={handleInputChange}
-              placeholder="+254 700 000 000"
+              placeholder="+254 720 339 204"
             />
           </FormGroup>
           

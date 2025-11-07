@@ -277,7 +277,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
               value={formData.phone}
               onChange={handleChange}
               required
-              placeholder="+254700000000"
+              placeholder="+254720339204"
               style={{
                 width: '100%',
                 padding: '0.75rem',

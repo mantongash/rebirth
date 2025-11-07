@@ -382,7 +382,7 @@ const GetInvolved = () => {
                   </ContactItem>
                   <ContactItem>
                     <FaPhone />
-                    <span>+254 712 345 678</span>
+                    <span>+254 720 339 204</span>
                   </ContactItem>
                   <ContactItem>
                     <FaMapMarkerAlt />

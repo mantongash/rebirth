@@ -243,9 +243,6 @@ router.post('/cart/add', authenticateToken, async (req, res) => {
     }
 
     await user.addToCart(productId, quantity);
-    // Refresh addedAt timestamp for retention
-    const ci = user.cart.find(ci => ci.product.toString() === productId.toString());
-    if (ci) ci.addedAt = new Date();
     await user.populate('cart.product');
 
     res.json({
@@ -329,9 +326,6 @@ router.put('/cart/update', authenticateToken, async (req, res) => {
     }
 
     await user.updateCartQuantity(productId, quantity);
-    // Touch timestamp when updating
-    const ci = user.cart.find(ci => ci.product.toString() === productId.toString());
-    if (ci) ci.addedAt = new Date();
     await user.populate('cart.product');
 
     res.json({
@@ -425,7 +419,7 @@ router.post('/cart/clear', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/auth/cart
-// @desc    Get user's cart with 20-day retention filtering
+// @desc    Get user's cart with 7-day retention filtering (professional standard)
 // @access  Private
 router.get('/cart', authenticateToken, async (req, res) => {
   try {
@@ -434,17 +428,33 @@ router.get('/cart', authenticateToken, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     const now = Date.now();
-    const twentyDaysMs = 20 * 24 * 60 * 60 * 1000;
-    // Filter items older than 20 days
-    user.cart = user.cart.filter(ci => !ci.addedAt || (now - new Date(ci.addedAt).getTime()) <= twentyDaysMs);
-    await user.save();
-    await user.populate('cart.product');
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    const originalCartLength = user.cart.length;
+    
+    // Filter items older than 7 days
+    user.cart = user.cart.filter(ci => {
+      if (!ci.addedAt) return false; // Remove items without timestamps
+      return (now - new Date(ci.addedAt).getTime()) <= sevenDaysMs;
+    });
+    
+    // Update cart last activity timestamp
+    if (user.cart.length > 0) {
+      user.cartLastActivity = new Date();
+    }
+    
+    // Save changes if cart was modified
+    if (user.cart.length !== originalCartLength) {
+      await user.save();
+      await user.populate('cart.product');
+    }
+    
     return res.json({
       success: true,
       data: {
         cart: user.cart,
         cartItemCount: user.cartItemCount,
-        cartTotal: user.cartTotal
+        cartTotal: user.cartTotal,
+        cartExpiry: user.cartLastActivity ? new Date(user.cartLastActivity.getTime() + sevenDaysMs) : null
       }
     });
   } catch (error) {
@@ -533,7 +543,7 @@ router.delete('/favorites/remove/:productId', authenticateToken, async (req, res
 });
 
 // @route   GET /api/auth/favorites
-// @desc    Get user's favorites
+// @desc    Get user's favorites with 7-day retention filtering (professional standard)
 // @access  Private
 router.get('/favorites', authenticateToken, async (req, res) => {
   try {
@@ -546,10 +556,32 @@ router.get('/favorites', authenticateToken, async (req, res) => {
       });
     }
 
+    const now = Date.now();
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    const originalFavoritesLength = user.favorites.length;
+    
+    // Filter favorites older than 7 days
+    user.favorites = user.favorites.filter(fav => {
+      if (!fav.addedAt) return false; // Remove favorites without timestamps
+      return (now - new Date(fav.addedAt).getTime()) <= sevenDaysMs;
+    });
+    
+    // Update favorites last activity timestamp
+    if (user.favorites.length > 0) {
+      user.favoritesLastActivity = new Date();
+    }
+    
+    // Save changes if favorites were modified
+    if (user.favorites.length !== originalFavoritesLength) {
+      await user.save();
+      await user.populate('favorites.product');
+    }
+
     res.json({
       success: true,
       data: {
-        favorites: user.favorites
+        favorites: user.favorites,
+        favoritesExpiry: user.favoritesLastActivity ? new Date(user.favoritesLastActivity.getTime() + sevenDaysMs) : null
       }
     });
 

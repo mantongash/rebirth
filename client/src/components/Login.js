@@ -44,16 +44,16 @@ const Login = ({ onClose, onSwitchToRegister }) => {
       const result = await login(formData.email.trim(), formData.password);
       
       if (result.success) {
-        showSuccess('Welcome back! You have successfully logged in.');
+        showSuccess('Welcome Back', 'You have successfully logged in');
         setTimeout(() => {
           onClose();
         }, 1500);
       } else {
-        showError(result.message || 'Login failed. Please check your credentials and try again.');
+        showError('Login Failed', result.message || 'Please check your credentials and try again');
       }
     } catch (err) {
       console.error('Login error:', err);
-      showError('An unexpected error occurred. Please try again.');
+      showError('Login Error', 'An unexpected error occurred. Please try again');
     } finally {
       setIsLoading(false);
     }

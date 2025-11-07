@@ -7,7 +7,7 @@ const LogoutNotificationContainer = styled(motion.div)`
   position: fixed;
   top: 2rem;
   right: 2rem;
-  z-index: 9999;
+  z-index: 100000;
   max-width: 400px;
   width: 100%;
 `;

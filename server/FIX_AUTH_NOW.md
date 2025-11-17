@@ -13,7 +13,7 @@ Error: bad auth : authentication failed
 1. Go to **MongoDB Atlas**: https://cloud.mongodb.com/
 2. Log in to your account
 3. Click **"Database Access"** in the left sidebar
-4. Find your user: **Samokello024**
+4. Find your database user
 5. Click **"Edit"** on the user
 6. Click **"Edit Password"** to see/reset the password
 
@@ -43,7 +43,7 @@ Error: bad auth : authentication failed
 **Example:**
 - Password: `p@ssw:rd`
 - Encoded: `p%40ssw%3Ard`
-- Connection string: `mongodb+srv://Samokello024:p%40ssw%3Ard@cluster0.9fiw8iu.mongodb.net/...`
+- Connection string: `mongodb+srv://YOUR_USERNAME:p%40ssw%3Ard@YOUR_CLUSTER.mongodb.net/...`
 
 ### Step 3: Get Fresh Connection String from Atlas (EASIEST)
 

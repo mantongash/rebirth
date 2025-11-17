@@ -44,7 +44,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
       const result = await login(formData.email.trim(), formData.password);
       
       if (result.success) {
-        showSuccess('Welcome Back', 'You have successfully logged in');
+        showSuccess('Login Successful', 'You have been logged in successfully.');
         setTimeout(() => {
           onClose();
         }, 1500);

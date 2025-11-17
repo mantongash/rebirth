@@ -25,14 +25,14 @@ I noticed your connection string has `atlas-xxxxx-shard-0` which is a placeholde
 
 The connection string should look like this:
 ```
-mongodb://Samokello024:YOUR_PASSWORD@cluster0-shard-00-00.9fiw8iu.mongodb.net:27017,cluster0-shard-00-01.9fiw8iu.mongodb.net:27017,cluster0-shard-00-02.9fiw8iu.mongodb.net:27017/rebirth-of-a-queen?ssl=true&replicaSet=atlas-ACTUAL-NAME-shard-0&authSource=admin&retryWrites=true&w=majority
+mongodb://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-01.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-02.xxxxx.mongodb.net:27017/YOUR_DATABASE?ssl=true&replicaSet=atlas-ACTUAL-NAME-shard-0&authSource=admin&retryWrites=true&w=majority
 ```
 
 **Key points:**
 - ✅ Starts with `mongodb://` (not `mongodb+srv://`)
 - ✅ Has port numbers `:27017` after each hostname
 - ✅ Has `replicaSet=atlas-ACTUAL-NAME-shard-0` (NOT "atlas-xxxxx-shard-0")
-- ✅ Has your actual username: `Samokello024`
+- ✅ Has your actual username
 - ✅ Has your actual password (URL-encoded if needed)
 
 ### Step 4: Update Your .env File
@@ -49,7 +49,7 @@ Even though you confirmed it, let's verify again:
 1. In MongoDB Atlas, go to **"Network Access"**
 2. Check the list of IP addresses
 3. Make sure you see either:
-   - Your specific IP: `105.160.64.150` (or your current IP)
+   - Your specific IP address (or your current IP)
    - OR: `0.0.0.0/0` (allows all IPs)
 4. If neither is there, **add `0.0.0.0/0`** now
 5. **Wait 2-3 minutes** after adding
@@ -63,7 +63,7 @@ Even though you confirmed it, let's verify again:
 ### Step 7: Verify Database User
 
 1. Go to **"Database Access"** in MongoDB Atlas
-2. Find user: `Samokello024`
+2. Find your database user
 3. Verify the password is correct
 4. If unsure, click **"Edit"** → **"Edit Password"** → Reset it
 5. Update your `.env` file with the new password

@@ -23,7 +23,7 @@ The SRV connection string (`mongodb+srv://`) requires DNS SRV record resolution,
 2. Find the line: `MONGODB_URI=...`
 3. Replace it with your Standard connection string:
    ```
-   MONGODB_URI=mongodb://Samokello024:password@cluster0-shard-00-00.9fiw8iu.mongodb.net:27017,cluster0-shard-00-01.9fiw8iu.mongodb.net:27017,cluster0-shard-00-02.9fiw8iu.mongodb.net:27017/rebirth-of-a-queen?ssl=true&replicaSet=atlas-xxxxx-shard-0&authSource=admin&retryWrites=true&w=majority
+   MONGODB_URI=mongodb://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-01.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-02.xxxxx.mongodb.net:27017/YOUR_DATABASE?ssl=true&replicaSet=atlas-xxxxx-shard-0&authSource=admin&retryWrites=true&w=majority
    ```
    - Replace `password` with your actual password (URL-encoded if needed)
    - The connection string from Atlas will have the correct values

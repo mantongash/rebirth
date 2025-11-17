@@ -3,7 +3,7 @@
 ## Issues Fixed
 
 1. ✅ **Removed SRV connection string** - The `mongodb+srv://` connection was causing DNS issues
-2. ✅ **Fixed replicaSet placeholder** - Changed `atlas-xxxxx-shard-0` to `atlas-9fiw8iu-shard-0`
+2. ✅ **Fixed replicaSet placeholder** - Using correct replicaSet name
 3. ✅ **Set standard connection as primary** - Now using `mongodb://` connection string
 
 ## Remaining Issue: IP Whitelist
@@ -60,7 +60,7 @@ You should see: `✅ SUCCESS! Connected to MongoDB Atlas`
 
 Your connection string is now correctly configured:
 - ✅ Type: Standard (`mongodb://`)
-- ✅ ReplicaSet: `atlas-9fiw8iu-shard-0` (no placeholder)
+- ✅ ReplicaSet: `atlas-xxxxx-shard-0`
 - ✅ All required parameters present
 
 ## If Connection Still Fails

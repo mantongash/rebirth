@@ -50,7 +50,7 @@ If you want to test quickly without IP restrictions:
 ## 📋 Current Connection Status
 
 - ✅ Connection string format: **Correct**
-- ✅ ReplicaSet: **atlas-9fiw8iu-shard-0** (no placeholder)
+- ✅ ReplicaSet: **atlas-xxxxx-shard-0**
 - ✅ Connection type: **Standard (mongodb://)**
 - ❌ IP Whitelist: **Needs to be added**
 

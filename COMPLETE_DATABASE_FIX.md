@@ -2,7 +2,7 @@
 
 ## Problem Summary
 - ✅ IP addresses are whitelisted in MongoDB Atlas
-- ❌ DNS resolution is failing (can't resolve `cluster0.9fiw8iu.mongodb.net`)
+- ❌ DNS resolution is failing (can't resolve cluster hostname)
 - ❌ SRV connection string (`mongodb+srv://`) requires DNS which is broken
 
 ## ✅ Complete Solution
@@ -29,7 +29,7 @@ This bypasses DNS issues completely.
 1. Open `server/.env` file (create it if it doesn't exist)
 2. Find or add this line:
    ```
-   MONGODB_URI=mongodb://Samokello024:YOUR_PASSWORD@cluster0-shard-00-00.9fiw8iu.mongodb.net:27017,cluster0-shard-00-01.9fiw8iu.mongodb.net:27017,cluster0-shard-00-02.9fiw8iu.mongodb.net:27017/rebirth-of-a-queen?ssl=true&replicaSet=atlas-xxxxx-shard-0&authSource=admin&retryWrites=true&w=majority
+   MONGODB_URI=mongodb://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-01.xxxxx.mongodb.net:27017,YOUR_CLUSTER-shard-00-02.xxxxx.mongodb.net:27017/YOUR_DATABASE?ssl=true&replicaSet=atlas-xxxxx-shard-0&authSource=admin&retryWrites=true&w=majority
    ```
 3. **Replace** `YOUR_PASSWORD` with your actual MongoDB password
    - If your password has special characters, they must be URL-encoded:
@@ -92,7 +92,7 @@ netsh interface ip add dns "Wi-Fi" 8.8.4.4 index=2
 
 ```powershell
 # Test DNS
-nslookup cluster0.9fiw8iu.mongodb.net
+nslookup YOUR_CLUSTER.mongodb.net
 
 # Should return IP addresses
 ```
@@ -167,13 +167,13 @@ After applying the fix, you should see:
 **In test output:**
 ```
 ✅ SUCCESS! Connected to MongoDB Atlas
-📦 Database: rebirth-of-a-queen
-🌐 Host: cluster0-shard-00-00.xxxxx.mongodb.net
+📦 Database: YOUR_DATABASE
+🌐 Host: YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net
 ```
 
 **In server logs:**
 ```
-📦 [primary] MongoDB Connected: cluster0-shard-00-00.xxxxx.mongodb.net
+📦 [primary] MongoDB Connected: YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net
 🔌 Mongoose connected
 ```
 

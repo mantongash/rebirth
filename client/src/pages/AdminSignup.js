@@ -654,13 +654,13 @@ const AdminSignup = () => {
       if (response.ok && data.success) {
         if (data.data?.user?.role === 'admin') {
           if (existingAdminToken) {
-            setSuccess('Admin account created successfully!');
-            showSuccess('Admin account created successfully!');
+            setSuccess('Admin account created successfully.');
+            showSuccess('Account Created', 'Admin account has been created successfully.');
             setTimeout(() => {
               navigate('/admin/users');
             }, 1500);
           } else {
-            setSuccess('Admin account created successfully! Logging you in...');
+            setSuccess('Account created. Logging you in...');
             showSuccess('Admin account created successfully!');
             
             setTimeout(async () => {

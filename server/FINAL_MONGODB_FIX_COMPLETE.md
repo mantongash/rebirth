@@ -2,14 +2,14 @@
 
 ## 🎯 What Was Fixed
 
-1. ✅ **Connection String Format** - Fixed replicaSet placeholder (`atlas-xxxxx-shard-0` → `atlas-9fiw8iu-shard-0`)
+1. ✅ **Connection String Format** - Fixed replicaSet placeholder
 2. ✅ **Removed SRV Connection** - Switched from `mongodb+srv://` to `mongodb://` (standard connection)
 3. ✅ **Improved Connection Configuration** - Increased timeouts and retry attempts
 4. ✅ **Created Diagnostic Tools** - Comprehensive fix script to identify issues
 
 ## 🔴 ONE REMAINING ISSUE: IP Whitelist
 
-**Your IP Address: `105.160.64.150`**
+**Your IP Address needs to be whitelisted**
 
 This IP needs to be whitelisted in MongoDB Atlas for the connection to work.
 
@@ -21,7 +21,7 @@ This IP needs to be whitelisted in MongoDB Atlas for the connection to work.
 2. Log in to your account
 3. Click **"Network Access"** in the left sidebar
 4. Click **"Add IP Address"** button
-5. Click **"Add Current IP Address"** (or enter: `105.160.64.150`)
+5. Click **"Add Current IP Address"** (or enter your IP address)
 6. Click **"Confirm"**
 7. **Wait 2-3 minutes** for changes to take effect
 
@@ -51,10 +51,10 @@ npm start
 | Item | Status | Details |
 |------|--------|---------|
 | Connection String | ✅ Fixed | Standard format (`mongodb://`) |
-| ReplicaSet | ✅ Fixed | `atlas-9fiw8iu-shard-0` (no placeholder) |
+| ReplicaSet | ✅ Fixed | `atlas-xxxxx-shard-0` |
 | Username/Password | ✅ Present | Found in connection string |
 | Connection Type | ✅ Correct | Standard (bypasses DNS issues) |
-| IP Whitelist | ❌ **NEEDS ACTION** | Add `105.160.64.150` to MongoDB Atlas |
+| IP Whitelist | ❌ **NEEDS ACTION** | Add your IP address to MongoDB Atlas |
 
 ## 🛠️ Tools Created
 

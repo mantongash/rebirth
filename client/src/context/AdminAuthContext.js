@@ -110,7 +110,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogout = React.useCallback(async () => {
     // Show logout success message
-    const logoutMessage = '👋 Logged out successfully. Thank you for using the admin panel!';
+    const logoutMessage = 'You have been logged out successfully.';
     
     // Store logout message for display
     sessionStorage.setItem('adminLogoutMessage', logoutMessage);

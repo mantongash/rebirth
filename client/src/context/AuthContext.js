@@ -264,7 +264,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     // Show logout success message
-    const logoutMessage = '👋 Logged out successfully. Thank you for visiting Rebirth of a Queen!';
+    const logoutMessage = 'You have been logged out successfully.';
     
     // Store logout message for display
     sessionStorage.setItem('userLogoutMessage', logoutMessage);

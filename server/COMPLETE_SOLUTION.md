@@ -3,7 +3,7 @@
 ## ✅ What's Been Fixed
 
 1. ✅ **Connection String** - Changed from `mongodb+srv://` to `mongodb://` (standard connection)
-2. ✅ **ReplicaSet** - Using correct `atlas-9fiw8iu-shard-0` (no placeholder)
+2. ✅ **ReplicaSet** - Using correct replicaSet name
 3. ✅ **Connection Order** - Primary connection tried first
 4. ✅ **Cart Cleanup Service** - Now waits for DB connection before running
 
@@ -51,8 +51,8 @@ node test-db-connection.js
 **Expected Output:**
 ```
 ✅ SUCCESS! Connected to MongoDB Atlas
-🌐 Host: ac-9fiw8iu-shard-00-00.9fiw8iu.mongodb.net
-📊 Database: rebirth-of-a-queen
+🌐 Host: YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net
+📊 Database: YOUR_DATABASE
 ```
 
 ### Step 4: Start Your Server
@@ -65,7 +65,7 @@ npm start
 ```
 🔄 Trying primary connection...
 🧩 [primary] MongoDB connect attempt 1/3 ...
-📦 [primary] MongoDB Connected: ac-9fiw8iu-shard-00-00.9fiw8iu.mongodb.net
+📦 [primary] MongoDB Connected: YOUR_CLUSTER-shard-00-00.xxxxx.mongodb.net
 🔌 Mongoose connected
 🔌 Mongoose connected - starting cart cleanup service...
 🧹 Cart cleanup service started - expired carts will be cleaned every 24 hours
@@ -77,10 +77,10 @@ npm start
 | Item | Status | Value |
 |------|--------|-------|
 | Connection String | ✅ Fixed | `mongodb://` (standard) |
-| ReplicaSet | ✅ Fixed | `atlas-9fiw8iu-shard-0` |
-| Username | ✅ Correct | `Samokello024` |
+| ReplicaSet | ✅ Fixed | `atlas-xxxxx-shard-0` |
+| Username | ✅ Correct | (configured) |
 | Password | ✅ Present | (configured) |
-| IP Whitelist | ❌ **NEEDS ACTION** | Add `105.160.64.150` |
+| IP Whitelist | ❌ **NEEDS ACTION** | Add your IP or `0.0.0.0/0` |
 
 ## 🔍 Troubleshooting
 

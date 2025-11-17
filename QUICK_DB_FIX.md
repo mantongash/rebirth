@@ -1,7 +1,7 @@
 # 🔧 Quick Database Connection Fix
 
 ## Current Error
-`queryTxt ETIMEOUT cluster0.9fiw8iu.mongodb.net`
+`queryTxt ETIMEOUT YOUR_CLUSTER.mongodb.net`
 
 This means your computer cannot resolve the MongoDB Atlas hostname.
 
@@ -61,10 +61,10 @@ If SRV continues to fail, use the Standard connection string:
 ### Solution 6: Test Internet Connection
 ```powershell
 # Test if you can reach MongoDB
-ping cluster0.9fiw8iu.mongodb.net
+ping YOUR_CLUSTER.mongodb.net
 
 # Test DNS resolution
-nslookup cluster0.9fiw8iu.mongodb.net
+nslookup YOUR_CLUSTER.mongodb.net
 ```
 
 ### Solution 7: Use Mobile Hotspot

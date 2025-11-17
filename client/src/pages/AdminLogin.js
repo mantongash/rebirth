@@ -408,8 +408,8 @@ const AdminLogin = () => {
       const result = await adminLogin(email, password, twoFactor);
       
       if (result.success) {
-        setSuccess('🎉 Welcome back, Admin! Login successful. Redirecting to dashboard...');
-        showSuccess('Admin Login Successful', 'Welcome back! Redirecting to admin dashboard...', 3000);
+        setSuccess('Login successful. Redirecting to admin dashboard...');
+        showSuccess('Login Successful', 'You have been logged in successfully. Redirecting...', 2000);
         if (remember) {
           try { localStorage.setItem('adminEmail', email); } catch (_) {}
         } else {

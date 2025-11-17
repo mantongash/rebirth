@@ -10,7 +10,8 @@ const dns = require('dns').promises;
 const testDNSResolution = async () => {
   console.log('🔍 Testing DNS Resolution...\n');
   
-  const hostname = 'cluster0.9fiw8iu.mongodb.net';
+  // Get hostname from environment or use placeholder
+  const hostname = process.env.MONGODB_CLUSTER_HOSTNAME || 'YOUR_CLUSTER.mongodb.net';
   
   try {
     console.log(`Testing DNS lookup for: ${hostname}`);

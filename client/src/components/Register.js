@@ -96,7 +96,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
       const result = await register(registerData);
       
       if (result.success) {
-        showSuccess('Account created successfully! Welcome to Rebirth of a Queen!');
+        showSuccess('Account Created', 'Your account has been created successfully.');
         setTimeout(() => {
           onClose();
         }, 2000);

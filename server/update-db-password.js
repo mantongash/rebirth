@@ -42,7 +42,7 @@ async function main() {
 
   // Extract current username
   const usernameMatch = currentURI.match(/mongodb\+?srv?:\/\/([^:]+):/);
-  const username = usernameMatch ? usernameMatch[1] : 'Samokello024';
+  const username = usernameMatch ? usernameMatch[1] : 'your-username';
   
   console.log('📋 Current Connection Info:');
   console.log(`   Username: ${username}`);

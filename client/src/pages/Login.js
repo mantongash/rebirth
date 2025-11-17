@@ -691,8 +691,8 @@ const Login = () => {
       const result = await login(formData.email.trim(), formData.password);
       
       if (result.success) {
-        setSuccess('🎉 Welcome back! Login successful. Redirecting to your dashboard...');
-        showSuccess('Login Successful', 'Welcome back! Redirecting to your dashboard...', 3000);
+        setSuccess('Login successful. Redirecting to your dashboard...');
+        showSuccess('Login Successful', 'You have been logged in successfully. Redirecting...', 2000);
         setTimeout(() => {
           navigate(from, { replace: true });
         }, 2000);

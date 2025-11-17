@@ -864,8 +864,8 @@ const Signup = () => {
       const result = await register(userData);
       
       if (result.success) {
-        setSuccess('🎉 Welcome to Rebirth of a Queen! Your account has been created successfully. Redirecting to your dashboard...');
-        showSuccess('Account Created!', 'Welcome to Rebirth of a Queen! Your account has been created successfully.', 4000);
+        setSuccess('Account created successfully. Redirecting to your dashboard...');
+        showSuccess('Account Created', 'Your account has been created successfully. You will be redirected shortly.', 3000);
         setTimeout(() => {
           navigate('/');
         }, 3000);

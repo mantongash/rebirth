@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaEdit, FaTrash, FaEye, FaUserPlus, FaSpinner, FaUsers } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaSpinner, FaUsers, FaCrown } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 0;
@@ -274,14 +275,16 @@ const AdminUsers = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState('');
 
   const { getAdminToken } = useAdminAuth();
   const navigate = useNavigate();
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE = getApiUrl();
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, searchTerm, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
@@ -355,7 +358,8 @@ const AdminUsers = () => {
   const handleUserAction = async (action, userId) => {
     try {
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const { getApiUrl } = require('../utils/apiConfig');
+      const API_BASE = getApiUrl();
       
       switch (action) {
         case 'view':
@@ -409,6 +413,38 @@ const AdminUsers = () => {
             alert(`User ${newStatus ? 'activated' : 'deactivated'} successfully`);
           } else {
             alert('Failed to update user status');
+          }
+          break;
+          
+        case 'promoteToAdmin':
+          if (!window.confirm(`Are you sure you want to promote this user to admin? This will give them full access to the admin dashboard.`)) {
+            return;
+          }
+          
+          const promoteResponse = await fetch(`${API_BASE}/admin/users/${userId}/promote-to-admin`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (promoteResponse.ok) {
+            const promoteData = await promoteResponse.json();
+            if (promoteData.success) {
+              // Update user role in the list
+              setUsers(prev => prev.map(u => 
+                u._id === userId ? { ...u, role: 'admin' } : u
+              ));
+              alert('User promoted to admin successfully');
+              // Refresh users list
+              fetchUsers();
+            } else {
+              alert(promoteData.message || 'Failed to promote user to admin');
+            }
+          } else {
+            const errorData = await promoteResponse.json();
+            alert(errorData.message || 'Failed to promote user to admin');
           }
           break;
           
@@ -530,6 +566,15 @@ const AdminUsers = () => {
                 >
                   <FaEdit />
                 </ActionButton>
+                {user.role !== 'admin' && (
+                  <ActionButton 
+                    title="Promote to Admin"
+                    onClick={() => handleUserAction('promoteToAdmin', user._id)}
+                    style={{ background: '#10b981', color: 'white' }}
+                  >
+                    <FaCrown />
+                  </ActionButton>
+                )}
                 <ActionButton 
                   $danger 
                   title="Delete User"

@@ -48,6 +48,8 @@ import Careers from './pages/Careers';
 import ShopNaivas from './pages/ShopNaivas';
 import ProductDetail from './pages/ProductDetail';
 import ProfessionalCheckout from './pages/ProfessionalCheckout';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import OrderConfirmation from './pages/OrderConfirmation';
 import OrderSuccess from './pages/OrderSuccess';
 import OrderPayment from './pages/OrderPayment';
@@ -92,6 +94,7 @@ import Gallery from './pages/Gallery';
 
 // Admin pages
 import AdminLogin from './pages/AdminLogin';
+import AdminSignup from './pages/AdminSignup';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminUsers from './pages/AdminUsers';
@@ -159,6 +162,8 @@ function AppContent() {
             <Route path="/partners" element={<Layout><Partners /></Layout>} />
             <Route path="/volunteer" element={<Layout><VolunteerProgram /></Layout>} />
             <Route path="/donate" element={<Layout><Donate /></Layout>} />
+            <Route path="/privacy-policy" element={<Layout><PrivacyPolicy /></Layout>} />
+            <Route path="/terms-of-service" element={<Layout><TermsOfService /></Layout>} />
             <Route path="/partner" element={<Layout><Partner /></Layout>} />
             <Route path="/careers" element={<Layout><Careers /></Layout>} />
             <Route path="/signup" element={<Layout><Signup /></Layout>} />
@@ -224,6 +229,7 @@ function AppContent() {
             
             {/* Admin Routes */}
             <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-signup" element={<AdminSignup />} />
             <Route path="/admin" element={
               <AdminPrivateRoute>
                 <AdminLayout>

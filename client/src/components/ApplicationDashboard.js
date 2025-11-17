@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { FaEnvelope, FaSms, FaUsers, FaClock, FaCheckCircle, FaTimesCircle, FaEye, FaReply, FaChartLine , FaCalendarAlt, FaFilter, FaSearch } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import ApplicationResponseModal from './ApplicationResponseModal';
+import { getApiUrl } from '../utils/apiConfig';
 
 const ApplicationDashboard = () => {
   const [applications, setApplications] = useState([]);
@@ -26,7 +27,7 @@ const ApplicationDashboard = () => {
     try {
       setLoading(true);
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
 
       const response = await fetch(`${API_BASE}/admin/applications?limit=50`, {
         headers: {

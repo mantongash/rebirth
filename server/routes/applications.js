@@ -3,6 +3,7 @@ const router = express.Router();
 const Application = require('../models/Application');
 const emailService = require('../services/emailService');
 const smsService = require('../services/smsService');
+const { authenticateAdmin } = require('../middleware/auth');
 
 // @route   POST /api/applications
 // @desc    Submit a program application
@@ -95,8 +96,8 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/applications
 // @desc    Get all applications (admin only)
-// @access  Private
-router.get('/', async (req, res) => {
+// @access  Private (Admin only)
+router.get('/', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -138,8 +139,8 @@ router.get('/', async (req, res) => {
 
 // @route   PUT /api/applications/:id/status
 // @desc    Update application status and send review letter (admin only)
-// @access  Private
-router.put('/:id/status', async (req, res) => {
+// @access  Private (Admin only)
+router.put('/:id/status', authenticateAdmin, async (req, res) => {
   try {
     const { status, reviewNotes } = req.body;
     const applicationId = req.params.id;
@@ -193,8 +194,8 @@ router.put('/:id/status', async (req, res) => {
 
 // @route   GET /api/applications/:id
 // @desc    Get single application (admin only)
-// @access  Private
-router.get('/:id', async (req, res) => {
+// @access  Private (Admin only)
+router.get('/:id', authenticateAdmin, async (req, res) => {
   try {
     const application = await Application.findById(req.params.id);
     

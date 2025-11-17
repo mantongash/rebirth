@@ -9,6 +9,7 @@ import {
   FaArrowLeft, FaPlus, FaSave, FaTimes, FaCopy, FaShare
 } from 'react-icons/fa';
 import SMSService from '../services/smsService';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   max-width: 1400px;
@@ -548,7 +549,7 @@ const AdminBulkSMS = () => {
     setTestResult(null);
     
     try {
-      const response = await fetch('/api/sms/test', {
+      const response = await fetch(buildApiUrl('sms/test'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAdminAuth } from '../context/AdminAuthContext';
@@ -597,6 +597,9 @@ const AdminLogin = () => {
           
           <BackLink href="/">
             ← Return to main website
+          </BackLink>
+          <BackLink as={Link} to="/admin-signup" style={{ marginTop: '0.5rem' }}>
+            Don't have an account? Sign up
           </BackLink>
         </LoginCard>
       </LoginWrapper>

@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import { renderIcon } from '../utils/iconMapper';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding:1rem;
@@ -244,7 +245,7 @@ const AdminAnalytics = () => {
       setError('');
       
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const response = await fetch(`${API_BASE}/admin/analytics?timeRange=${timeRange}`, {
         headers: {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaClock, FaTimesCircle, FaSpinner } from 'react-icons/fa';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const PaymentStatus = ({ orderId, paymentMethod, onStatusUpdate }) => {
   const [status, setStatus] = useState('pending');
@@ -9,7 +10,7 @@ const PaymentStatus = ({ orderId, paymentMethod, onStatusUpdate }) => {
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
-        const response = await fetch('/api/payments/verify', {
+        const response = await fetch(buildApiUrl('payments/verify'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

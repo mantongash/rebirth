@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 require('dotenv').config();
 
 const connectDB = require('./config/db');
@@ -26,7 +29,56 @@ const { authenticateToken } = require('./middleware/auth');
 const app = express();
 
 // Connect to Database
+const mongoose = require('mongoose');
+
+// Start cart cleanup service only after DB connection
+mongoose.connection.on('connected', () => {
+  console.log('🔌 Mongoose connected - starting cart cleanup service...');
+  cartCleanupService.start();
+  console.log('🧹 Cart cleanup service started - expired carts will be cleaned every 24 hours');
+});
+
 connectDB();
+
+// Security Headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://www.paypal.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https://api.sandbox.paypal.com", "https://api.paypal.com", "https://api.safaricom.co.ke", "https://sandbox.safaricom.co.ke"],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Compression middleware
+app.use(compression());
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX || 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to all requests
+app.use('/api/', limiter);
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+  skipSuccessfulRequests: true,
+});
+
+app.use('/api/auth/', authLimiter);
 
 // Basic middleware
 app.use(cors({
@@ -38,11 +90,17 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session configuration for OAuth
+const isProduction = process.env.NODE_ENV === 'production';
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true in production with HTTPS
+  cookie: { 
+    secure: isProduction, // Set to true in production with HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: isProduction ? 'strict' : 'lax'
+  }
 }));
 
 // Passport middleware
@@ -61,8 +119,8 @@ app.post('/api/setup-admin', async (req, res) => {
       console.log('✅ Found admin user:', adminUser.firstName, adminUser.lastName);
       console.log('🔑 Current role:', adminUser.role);
       
-      // Check if role is already admin
-      if (adminUser.role === 'admin') {
+      // Check if role is already admin or super_admin
+      if (adminUser.role === 'admin' || adminUser.role === 'super_admin') {
         return res.json({
           success: true,
           message: 'Admin user already exists with correct role',
@@ -72,13 +130,13 @@ app.post('/api/setup-admin', async (req, res) => {
           }
         });
       } else {
-        // Update role to admin
-        adminUser.role = 'admin';
+        // Update role to super_admin (first admin should be super_admin)
+        adminUser.role = 'super_admin';
         await adminUser.save();
         
         return res.json({
           success: true,
-          message: 'Admin role updated successfully',
+          message: 'Super admin role updated successfully',
           credentials: {
             email: 'admin@rebirthofaqueen.org',
             password: 'admin123'
@@ -88,13 +146,13 @@ app.post('/api/setup-admin', async (req, res) => {
     } else {
       console.log('❌ Admin user not found. Creating new admin user...');
       
-      // Create new admin user
+      // Create new super admin user (first admin should be super_admin)
       const newAdminUser = new User({
         firstName: 'Rebirth',
         lastName: 'Queen',
         email: 'admin@rebirthofaqueen.org',
         password: 'admin123',
-        role: 'admin',
+        role: 'super_admin', // First admin is super_admin
         isActive: true,
         isEmailVerified: true,
         phone: '+254700000000'
@@ -289,7 +347,6 @@ app.listen(PORT, () => {
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
   
-  // Start cart cleanup service for professional cart management
-  cartCleanupService.start();
-  console.log('🧹 Cart cleanup service started - expired carts will be cleaned every 24 hours');
+  // Cart cleanup service will start automatically when MongoDB connects
+  // (see mongoose.connection.on('connected') handler above)
 }); 

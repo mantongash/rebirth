@@ -6,6 +6,7 @@ import {
   FaDownload, FaSync, FaFileAlt, FaImage, FaVideo, FaLink
 } from 'react-icons/fa';
 import ApplicationDashboard from '../components/ApplicationDashboard';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 2rem;
@@ -140,7 +141,7 @@ export default function AdminContent() {
     try {
       setLoading(true);
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const response = await fetch(`${API_BASE}/admin/content`, {
         headers: {

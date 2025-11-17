@@ -675,41 +675,46 @@ const AdminLayout = ({ children }) => {
 
   // Safe, real-time user info derived from context
   const adminDisplay = useMemo(() => {
-    console.log('Admin User Data:', adminUser); // Debug log
-    
     if (!adminUser) {
       return { 
         name: 'Admin User', 
         email: 'admin@rebirthofaqueen.org', 
         initials: 'AU',
         fullName: '',
-        username: ''
+        firstName: '',
+        lastName: ''
       };
     }
     
+    // Get firstName and lastName from adminUser
     const first = (adminUser?.firstName || adminUser?.first_name || '').trim();
     const last = (adminUser?.lastName || adminUser?.last_name || '').trim();
     const full = [first, last].filter(Boolean).join(' ').trim();
     const email = (adminUser?.email || '').trim();
-    const username = (adminUser?.username || '').trim();
     
-    // Priority: Full name > Username > Email prefix > Default
-    const name = full || username || (email ? email.split('@')[0] : 'Admin User');
+    // Priority: Full name > name property > Email prefix > Default
+    const name = full || adminUser?.name || (email ? email.split('@')[0] : 'Admin User');
     
-    // Generate initials from the name
-    const initials = name
-      .split(/\s|\./)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(s => s[0]?.toUpperCase())
-      .join('') || 'AU';
+    // Generate initials from firstName and lastName, or from name
+    let initials = 'AU';
+    if (first && last) {
+      initials = `${first[0]?.toUpperCase()}${last[0]?.toUpperCase()}`;
+    } else if (name) {
+      initials = name
+        .split(/\s|\./)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(s => s[0]?.toUpperCase())
+        .join('') || 'AU';
+    }
     
     return { 
       name, 
       email: email || 'admin@rebirthofaqueen.org', 
       initials,
       fullName: full,
-      username: username
+      firstName: first,
+      lastName: last
     };
   }, [adminUser]);
 

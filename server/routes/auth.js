@@ -8,10 +8,186 @@ const EmailService = require('../services/emailService');
 const SMSService = require('../services/smsService');
 
 // @route   POST /api/auth/register
-// @desc    Register a new user
+// @desc    Register a new user (regular users only - admin role is ignored for security)
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
+    const { firstName, lastName, email, phone, password, address } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided',
+        missingFields: {
+          firstName: !firstName,
+          lastName: !lastName,
+          email: !email,
+          phone: !phone,
+          password: !password
+        }
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+
+    // Check JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET is not set in environment variables');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error. Please contact support.'
+      });
+    }
+
+    // SECURITY: Ignore role from request body - regular registration always creates 'user' role
+    // Admin accounts must be created through the secure admin creation endpoint
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ 
+      $or: [{ email: email.toLowerCase().trim() }, { phone: phone.trim() }] 
+    });
+
+    if (existingUser) {
+      const conflictField = existingUser.email.toLowerCase() === email.toLowerCase().trim() ? 'email' : 'phone';
+      return res.status(400).json({
+        success: false,
+        message: `User with this ${conflictField} already exists`
+      });
+    }
+
+    // Create new user - always as regular user for security
+    const userData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password,
+      address: address || {},
+      role: 'user' // Always set to 'user' for security
+    };
+
+    const user = new User(userData);
+    await user.save();
+
+    // Reload user to ensure all fields are properly set
+    const savedUser = await User.findById(user._id);
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: savedUser._id, email: savedUser.email, role: savedUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        user: savedUser.toJSON(),
+        token
+      }
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors
+      });
+    }
+
+    if (error.code === 11000) {
+      // Duplicate key error
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `User with this ${field} already exists`
+      });
+    }
+
+    if (error.code === 13297) {
+      // Database name case mismatch error
+      console.error('❌ Database name case mismatch. Check your MONGODB_URI database name matches the existing database case.');
+      return res.status(500).json({
+        success: false,
+        message: 'Database configuration error. Please contact support.',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+
+    // Generic error response
+    res.status(500).json({
+      success: false,
+      message: 'Failed to register user',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred. Please try again.'
+    });
+  }
+});
+
+// @route   POST /api/auth/register-admin
+// @desc    Register a new admin (SECURE - requires existing admin authentication OR allows first admin)
+// @access  Private (Admin only) OR Public (if no admins exist)
+router.post('/register-admin', async (req, res) => {
+  try {
+    // Check if any admin users exist
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    let requestingUser = null;
+    
+    // If admins exist, require authentication
+    if (adminCount > 0) {
+      // Verify token if provided
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: 'Admin authentication required. Please login as an admin first.'
+        });
+      }
+
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        requestingUser = await User.findById(decoded.userId);
+        
+        if (!requestingUser || requestingUser.role !== 'admin') {
+          return res.status(403).json({
+            success: false,
+            message: 'Admin access required to create admin accounts'
+          });
+        }
+      } catch (tokenError) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid or expired token. Please login again.'
+        });
+      }
+    } else {
+      // If no admins exist, allow first admin creation (but log it for security)
+      console.log('[SECURITY] First admin account being created - no existing admins found');
+    }
+
     const { firstName, lastName, email, phone, password, address } = req.body;
 
     // Validate required fields
@@ -34,39 +210,45 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Create new user
-    const user = new User({
+    // Create new admin user
+    const userData = {
       firstName,
       lastName,
       email,
       phone,
       password,
-      address: address || {}
-    });
+      address: address || {},
+      role: 'admin', // Set as admin
+      isActive: true, // Auto-activate admin accounts
+      emailVerified: true // Auto-verify admin emails
+    };
 
+    const user = new User(userData);
     await user.save();
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Reload user to ensure all fields are properly set
+    const savedUser = await User.findById(user._id);
+
+    // Log admin creation for security audit
+    if (requestingUser) {
+      console.log(`[ADMIN CREATION] Admin ${requestingUser.email} created new admin account: ${email}`);
+    } else {
+      console.log(`[ADMIN CREATION] First admin account created: ${email}`);
+    }
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'Admin account created successfully',
       data: {
-        user: user.toJSON(),
-        token
+        user: savedUser.toJSON()
       }
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Admin registration error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to register user',
+      message: 'Failed to create admin account',
       error: error.message
     });
   }
@@ -87,10 +269,14 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email }).populate('cart.product favorites.product');
+    // Normalize email (lowercase and trim) to match registration
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Find user by email (email is stored as lowercase in DB)
+    const user = await User.findOne({ email: normalizedEmail }).populate('cart.product favorites.product');
     
     if (!user) {
+      console.log(`[LOGIN] User not found: ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -109,6 +295,7 @@ router.post('/login', async (req, res) => {
     const isPasswordValid = await user.comparePassword(password);
     
     if (!isPasswordValid) {
+      console.log(`[LOGIN] Invalid password for user: ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -178,7 +365,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 });
 
 // @route   PUT /api/auth/profile
-// @desc    Update user profile
+// @desc    Update user profile (all users including admins can update their own profile)
 // @access  Private
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
@@ -193,7 +380,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       });
     }
 
-    // Update allowed fields
+    // Update allowed fields (password change is handled separately)
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (phone) user.phone = phone;
@@ -215,6 +402,64 @@ router.put('/profile', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update profile',
+      error: error.message
+    });
+  }
+});
+
+// @route   PUT /api/auth/change-password
+// @desc    Change user password (all users including admins can change their own password)
+// @access  Private
+router.put('/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long'
+      });
+    }
+    
+    const user = await User.findById(req.user.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = await user.comparePassword(currentPassword);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password (will be hashed by pre-save hook)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change password',
       error: error.message
     });
   }

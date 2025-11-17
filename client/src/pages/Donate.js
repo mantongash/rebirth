@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { buildApiUrl } from '../utils/apiConfig';
 
 // --- Styled Components ---
 const Page = styled.div`
@@ -263,7 +264,7 @@ const Donate = () => {
 
   const fetchDonationStats = async () => {
     try {
-      const response = await fetch('/api/donations/public/stats');
+      const response = await fetch(buildApiUrl('donations/public/stats'));
       const data = await response.json();
       if (data.success) {
         setDonationStats(data.data);
@@ -275,7 +276,7 @@ const Donate = () => {
 
   const fetchPaymentMethods = useCallback(async () => {
     try {
-      const response = await fetch('/api/payments/methods');
+      const response = await fetch(buildApiUrl('payments/methods'));
       const data = await response.json();
       if (data.success) {
         setPaymentMethods(data.data);
@@ -299,7 +300,7 @@ const Donate = () => {
 
   const fetchPaystackConfig = async () => {
     try {
-      const response = await fetch('/api/paystack/config');
+      const response = await fetch(buildApiUrl('paystack/config'));
       const data = await response.json();
       if (data.success) {
         setPaystackConfig(data.data);
@@ -364,7 +365,7 @@ const Donate = () => {
       const amount = customAmount || selectedAmount || 10;
       console.log('Initializing unified payment:', { amount, paymentMethod, email, firstName, lastName, phone });
 
-      const response = await fetch('/api/payments/initialize', {
+      const response = await fetch(buildApiUrl('payments/initialize'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

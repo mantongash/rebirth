@@ -9,78 +9,265 @@ const Application = require('../models/Application');
 const Contact = require('../models/Contact');
 const Content = require('../models/Content');
 const router = express.Router();
-const { authenticateAdmin } = require('../middleware/auth');
+const { authenticateAdmin, authenticateSuperAdmin } = require('../middleware/auth');
 
 // Note: We rely on authenticateAdmin middleware from ../middleware/auth
 
-// Temporary route to create/fix admin user
-router.post('/create-admin', async (req, res) => {
+// SECURE: Create new admin user (requires super admin authentication)
+// @route   POST /api/admin/create-admin
+// @desc    Create a new admin user (SECURE - requires super admin)
+// @access  Private (Super Admin only)
+router.post('/create-admin', authenticateSuperAdmin, async (req, res) => {
   try {
-    console.log('🔍 Checking for admin user...');
-    
-    // Find admin user by email
-    const adminUser = await User.findOne({ email: 'admin@rebirthofaqueen.org' });
-    
-    if (adminUser) {
-      console.log('✅ Found admin user:', adminUser.firstName, adminUser.lastName);
-      console.log('🔑 Current role:', adminUser.role);
-      
-      // Check if role is already admin
-      if (adminUser.role === 'admin') {
-        return res.json({
-          success: true,
-          message: 'Admin user already exists with correct role',
-          credentials: {
-            email: 'admin@rebirthofaqueen.org',
-            password: 'admin123'
-          }
-        });
-      } else {
-        // Update role to admin
-        adminUser.role = 'admin';
-        await adminUser.save();
-        
-        return res.json({
-          success: true,
-          message: 'Admin role updated successfully',
-          credentials: {
-            email: 'admin@rebirthofaqueen.org',
-            password: 'admin123'
-          }
-        });
-      }
-    } else {
-      console.log('❌ Admin user not found. Creating new admin user...');
-      
-      // Create new admin user
-      const newAdminUser = new User({
-        firstName: 'Rebirth',
-        lastName: 'Queen',
-        email: 'admin@rebirthofaqueen.org',
-        password: 'admin123',
-        role: 'admin',
-        isActive: true,
-        isEmailVerified: true,
-        phone: '+254700000000'
-      });
+    const { firstName, lastName, email, phone, password } = req.body;
 
-      await newAdminUser.save();
-      
-      return res.json({
-        success: true,
-        message: 'New admin user created successfully',
-        credentials: {
-          email: 'admin@rebirthofaqueen.org',
-          password: 'admin123'
-        }
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided'
       });
     }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ 
+      $or: [{ email }, { phone }] 
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email or phone number already exists'
+      });
+    }
+
+    // Create new admin user
+    const newAdminUser = new User({
+      firstName,
+      lastName,
+      email,
+      phone,
+      password,
+      role: 'admin',
+      isActive: true,
+      emailVerified: true
+    });
+
+    await newAdminUser.save();
+
+    // Log admin creation for security audit
+    console.log(`[ADMIN CREATION] Super Admin ${req.user.email} created new admin account: ${email}`);
+
+    res.json({
+      success: true,
+      message: 'Admin account created successfully',
+      data: {
+        user: newAdminUser.toJSON()
+      }
+    });
     
   } catch (error) {
-    console.error('❌ Error creating/fixing admin user:', error);
+    console.error('Error creating admin user:', error);
     res.status(500).json({
       success: false,
       message: 'Error creating admin user',
+      error: error.message
+    });
+  }
+});
+
+// SECURE: Update user role to admin (requires super admin authentication)
+// @route   PUT /api/admin/users/:id/promote-to-admin
+// @desc    Promote a user to admin role (SECURE - requires super admin)
+// @access  Private (Super Admin only)
+router.put('/users/:id/promote-to-admin', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.role === 'admin' || user.role === 'super_admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already an admin or super admin'
+      });
+    }
+
+    // Get the role from request body, default to 'admin'
+    const { role = 'admin' } = req.body;
+    
+    // Only allow promoting to 'admin', not 'super_admin' (super_admin must be created manually)
+    if (role !== 'admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'Can only promote users to admin role. Super admin must be created separately.'
+      });
+    }
+
+    // Update role to admin
+    user.role = role;
+    user.isActive = true;
+    user.emailVerified = true;
+    await user.save();
+
+    // Log role promotion for security audit
+    console.log(`[ADMIN PROMOTION] Super Admin ${req.user.email} promoted user ${user.email} to ${role}`);
+
+    res.json({
+      success: true,
+      message: 'User promoted to admin successfully',
+      data: {
+        user: user.toJSON()
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error promoting user to admin:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error promoting user to admin',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/admin/admins
+// @desc    Get all admins (super admin only)
+// @access  Private (Super Admin only)
+router.get('/admins', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const admins = await User.find({ 
+      role: { $in: ['admin', 'super_admin'] } 
+    })
+    .select('-password')
+    .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: {
+        admins,
+        total: admins.length,
+        superAdmins: admins.filter(a => a.role === 'super_admin').length,
+        regularAdmins: admins.filter(a => a.role === 'admin').length
+      }
+    });
+  } catch (error) {
+    console.error('Get admins error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admins',
+      error: error.message
+    });
+  }
+});
+
+// @route   PUT /api/admin/admins/:id
+// @desc    Update admin details (super admin only)
+// @access  Private (Super Admin only)
+router.put('/admins/:id', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, isActive } = req.body;
+    const adminId = req.params.id;
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    // Cannot modify super_admin (except the current user modifying themselves)
+    if (admin.role === 'super_admin' && admin._id.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot modify other super admins'
+      });
+    }
+
+    // Update allowed fields
+    if (firstName) admin.firstName = firstName;
+    if (lastName) admin.lastName = lastName;
+    if (email) admin.email = email;
+    if (phone) admin.phone = phone;
+    if (isActive !== undefined) admin.isActive = isActive;
+
+    await admin.save();
+
+    console.log(`[ADMIN UPDATE] Super Admin ${req.user.email} updated admin ${admin.email}`);
+
+    res.json({
+      success: true,
+      message: 'Admin updated successfully',
+      data: {
+        admin: admin.toJSON()
+      }
+    });
+  } catch (error) {
+    console.error('Update admin error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update admin',
+      error: error.message
+    });
+  }
+});
+
+// @route   DELETE /api/admin/admins/:id
+// @desc    Remove admin (demote to user) - super admin only
+// @access  Private (Super Admin only)
+router.delete('/admins/:id', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const adminId = req.params.id;
+
+    // Cannot remove yourself
+    if (adminId === req.user.userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot remove your own admin access'
+      });
+    }
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    // Cannot remove super_admin
+    if (admin.role === 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot remove super admin. Super admins must be demoted manually in the database.'
+      });
+    }
+
+    // Demote to regular user
+    const previousRole = admin.role;
+    admin.role = 'user';
+    await admin.save();
+
+    console.log(`[ADMIN REMOVAL] Super Admin ${req.user.email} removed admin ${admin.email} (demoted to user)`);
+
+    res.json({
+      success: true,
+      message: 'Admin removed successfully (demoted to user)',
+      data: {
+        user: admin.toJSON()
+      }
+    });
+  } catch (error) {
+    console.error('Remove admin error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove admin',
       error: error.message
     });
   }
@@ -760,7 +947,7 @@ router.get('/sidebar-data', async (req, res) => {
 // ==================== ADMIN: CONTENT & PROGRAMS ====================
 
 // Admin - Contacts list with filters and stats
-router.get('/contacts', async (req, res) => {
+router.get('/contacts', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -818,7 +1005,7 @@ router.get('/contacts', async (req, res) => {
 });
 
 // Admin - Update contact status
-router.put('/contacts/:id/status', async (req, res) => {
+router.put('/contacts/:id/status', authenticateAdmin, async (req, res) => {
   try {
     const { status, reviewNotes } = req.body;
     const validStatuses = ['new', 'read', 'replied', 'closed'];
@@ -868,7 +1055,7 @@ router.get('/contacts/:id', async (req, res) => {
 });
 
 // Admin - Applications list with filters and stats
-router.get('/applications', async (req, res) => {
+router.get('/applications', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -1901,6 +2088,202 @@ router.get('/donations', async (req, res) => {
   } catch (error) {
     console.error('Get donations error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ==================== ADMIN: ORDER MANAGEMENT ====================
+
+// Admin - Get all orders with filters
+router.get('/orders', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, status, search, sortBy = 'orderDate', sortOrder = 'desc' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Build query
+    let query = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    if (search) {
+      query.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { 'customer.firstName': { $regex: search, $options: 'i' } },
+        { 'customer.lastName': { $regex: search, $options: 'i' } },
+        { 'customer.email': { $regex: search, $options: 'i' } },
+        { 'customer.phone': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate('items.product', 'name images')
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Order.countDocuments(query)
+    ]);
+
+    // Get status counts
+    const statusCounts = await Order.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    const stats = {
+      total,
+      pending: statusCounts.find(s => s._id === 'pending')?.count || 0,
+      confirmed: statusCounts.find(s => s._id === 'confirmed')?.count || 0,
+      processing: statusCounts.find(s => s._id === 'processing')?.count || 0,
+      shipped: statusCounts.find(s => s._id === 'shipped')?.count || 0,
+      delivered: statusCounts.find(s => s._id === 'delivered')?.count || 0,
+      cancelled: statusCounts.find(s => s._id === 'cancelled')?.count || 0,
+      refunded: statusCounts.find(s => s._id === 'refunded')?.count || 0
+    };
+
+    res.json({
+      success: true,
+      orders,
+      stats,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get orders (admin) error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error',
+      error: error.message 
+    });
+  }
+});
+
+// Admin - Get single order
+router.get('/orders/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('items.product', 'name images price');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      order
+    });
+  } catch (error) {
+    console.error('Get order (admin) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Admin - Update order status
+router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
+  try {
+    const { status, notes } = req.body;
+    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status'
+      });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    order.status = status;
+    if (notes) {
+      order.notes = notes;
+    }
+    order.updatedAt = new Date();
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Update order status (admin) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Admin - Update order details
+router.put('/orders/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    const { customer, shippingAddress, status, notes } = req.body;
+
+    if (customer) {
+      if (customer.firstName) order.customer.firstName = customer.firstName;
+      if (customer.lastName) order.customer.lastName = customer.lastName;
+      if (customer.email) order.customer.email = customer.email;
+      if (customer.phone) order.customer.phone = customer.phone;
+    }
+
+    if (shippingAddress) {
+      Object.assign(order.shippingAddress, shippingAddress);
+    }
+
+    if (status) {
+      const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+      if (validStatuses.includes(status)) {
+        order.status = status;
+      }
+    }
+
+    if (notes !== undefined) {
+      order.notes = notes;
+    }
+
+    order.updatedAt = new Date();
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Order updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Update order (admin) error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
   }
 });
 

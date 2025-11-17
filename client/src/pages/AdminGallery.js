@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPlus, FaEdit, FaTrash, FaEye, FaCalendarAlt, FaUpload, FaTimes, FaSave, FaSpinner, FaImage, FaExpand } from 'react-icons/fa';
 import { useNotification } from '../context/NotificationContext';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 2rem;
@@ -610,7 +611,7 @@ const AdminGallery = () => {
         throw new Error('No authentication token found. Please log in as admin.');
       }
 
-      const response = await fetch('/api/admin/gallery', {
+      const response = await fetch(buildApiUrl('admin/gallery'), {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -669,8 +670,8 @@ const AdminGallery = () => {
       }
 
       const url = editingGallery 
-        ? `/api/admin/gallery/${editingGallery._id}`
-        : '/api/admin/gallery';
+        ? buildApiUrl(`admin/gallery/${editingGallery._id}`)
+        : buildApiUrl('admin/gallery');
       const method = editingGallery ? 'PUT' : 'POST';
 
       console.log('Making request to:', url, 'with method:', method);
@@ -758,7 +759,7 @@ const AdminGallery = () => {
           throw new Error('No authentication token found. Please log in as admin.');
         }
 
-        const response = await fetch(`/api/admin/gallery/${id}`, {
+        const response = await fetch(buildApiUrl(`admin/gallery/${id}`), {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -820,7 +821,7 @@ const AdminGallery = () => {
         throw new Error('No authentication token found. Please log in as admin.');
       }
 
-      const response = await fetch('/api/upload/multiple', {
+      const response = await fetch(buildApiUrl('upload/multiple'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

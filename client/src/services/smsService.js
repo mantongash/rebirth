@@ -1,10 +1,12 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiUrl } from '../utils/apiConfig';
+
+const getApiBaseUrl = () => getApiUrl();
 
 class SMSService {
   // Send single SMS
   static async sendSMS(data) {
     try {
-      const response = await fetch(`${API_BASE_URL}/sms/send`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,7 +30,7 @@ class SMSService {
   // Send bulk SMS
   static async sendBulkSMS(data) {
     try {
-      const response = await fetch(`${API_BASE_URL}/sms/bulk-send`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/bulk-send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ class SMSService {
   static async getSMSHistory(params = {}) {
     try {
       const queryParams = new URLSearchParams(params).toString();
-      const response = await fetch(`${API_BASE_URL}/sms/history?${queryParams}`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/history?${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +78,7 @@ class SMSService {
   // Get SMS statistics
   static async getSMSStats() {
     try {
-      const response = await fetch(`${API_BASE_URL}/sms/stats`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/stats`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +101,7 @@ class SMSService {
   // Get SMS templates
   static async getSMSTemplates() {
     try {
-      const response = await fetch(`${API_BASE_URL}/sms/templates`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/templates`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +124,7 @@ class SMSService {
   // Check SMS service health
   static async checkSMSHealth() {
     try {
-      const response = await fetch(`${API_BASE_URL}/sms/health`, {
+      const response = await fetch(`${getApiBaseUrl()}/sms/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

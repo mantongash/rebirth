@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getBaseUrl } from '../utils/apiConfig';
 
 const AdminAuthContext = createContext();
 
@@ -36,7 +37,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogin = React.useCallback(async (email, password) => {
     try {
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const API_BASE = getBaseUrl();
       const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -48,8 +49,14 @@ export const AdminAuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok && data.success && data.data?.user) {
-        if (data.data.user.role !== 'admin') {
-          return { success: false, error: 'Admin access required' };
+        // Check if user has admin role
+        const userRole = data.data.user.role;
+        if (userRole !== 'admin') {
+          console.error('User role:', userRole, 'Expected: admin');
+          return { 
+            success: false, 
+            error: `Admin access required. Your current role is: ${userRole || 'user'}. Please contact support to upgrade your account.` 
+          };
         }
         // Generate avatar from email or initials
         const generateAvatar = (userData) => {
@@ -71,8 +78,12 @@ export const AdminAuthProvider = ({ children }) => {
 
         const adminData = {
           id: data.data.user._id,
+          _id: data.data.user._id,
+          firstName: data.data.user.firstName,
+          lastName: data.data.user.lastName,
           name: `${data.data.user.firstName} ${data.data.user.lastName}`,
           email: data.data.user.email,
+          phone: data.data.user.phone,
           role: data.data.user.role,
           avatar: generateAvatar(data.data.user),
           lastLogin: data.data.user.lastLogin || new Date().toISOString(),
@@ -123,9 +134,20 @@ export const AdminAuthProvider = ({ children }) => {
 
   const refreshAdminUser = React.useCallback(async () => {
     try {
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const token = getAdminToken();
+      if (!token) {
+        return;
+      }
       
-      const response = await fetch(`${API_BASE}/api/auth/profile`, { credentials: 'include' });
+      const API_BASE = getBaseUrl();
+      
+      const response = await fetch(`${API_BASE}/api/auth/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -145,16 +167,21 @@ export const AdminAuthProvider = ({ children }) => {
           return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=667eea&color=fff&size=200&bold=true&format=svg`;
         };
 
+        const user = data.data?.user || data.user;
         const updatedAdminData = {
-          id: (data.data?.user || data.user)._id,
-          name: `${(data.data?.user || data.user).firstName} ${(data.data?.user || data.user).lastName}`,
-          email: (data.data?.user || data.user).email,
-          role: (data.data?.user || data.user).role,
-          avatar: generateAvatar(data.data?.user || data.user),
-          lastLogin: (data.data?.user || data.user).lastLogin,
-          loginCount: (data.data?.user || data.user).loginCount,
-          createdAt: (data.data?.user || data.user).createdAt,
-          isActive: (data.data?.user || data.user).isActive
+          id: user._id,
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          avatar: generateAvatar(user),
+          lastLogin: user.lastLogin,
+          loginCount: user.loginCount,
+          createdAt: user.createdAt,
+          isActive: user.isActive
         };
 
         setAdminUser(updatedAdminData);
@@ -163,7 +190,8 @@ export const AdminAuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error refreshing admin user:', error);
     }
-  }, [getAdminToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = {
     isAdmin,

@@ -3,6 +3,7 @@ const router = express.Router();
 const Contact = require('../models/Contact');
 const emailService = require('../services/emailService');
 const smsService = require('../services/smsService');
+const { authenticateAdmin } = require('../middleware/auth');
 
 // @route   POST /api/contact
 // @desc    Submit a contact form
@@ -84,8 +85,8 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/contact
 // @desc    Get all contact submissions (admin only)
-// @access  Private
-router.get('/', async (req, res) => {
+// @access  Private (Admin only)
+router.get('/', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -122,8 +123,8 @@ router.get('/', async (req, res) => {
 
 // @route   PUT /api/contact/:id/status
 // @desc    Update contact status (admin only)
-// @access  Private
-router.put('/:id/status', async (req, res) => {
+// @access  Private (Admin only)
+router.put('/:id/status', authenticateAdmin, async (req, res) => {
   try {
     const { status, reviewNotes } = req.body;
     const contactId = req.params.id;

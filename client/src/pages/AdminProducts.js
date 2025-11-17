@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { FaPlus, FaEdit, FaTrash, FaUpload, FaTimes, FaSpinner, FaImage, FaSearch, FaFilter, FaSortAmountDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const AdminProducts = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const AdminProducts = () => {
         ...(selectedStatus && { status: selectedStatus })
       });
 
-      const response = await fetch(`/api/shop/admin/products?${params}`, {
+      const response = await fetch(buildApiUrl(`shop/admin/products?${params}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -140,7 +141,7 @@ const AdminProducts = () => {
         throw new Error('No authentication token found. Please log in as admin.');
       }
 
-      const response = await fetch('/api/upload/multiple', {
+      const response = await fetch(buildApiUrl('upload/multiple'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -293,8 +294,8 @@ const AdminProducts = () => {
       };
 
       const url = editingProduct 
-        ? `/api/shop/products/${editingProduct._id}`
-        : '/api/shop/products';
+        ? buildApiUrl(`shop/products/${editingProduct._id}`)
+        : buildApiUrl('shop/products');
       
       const method = editingProduct ? 'PUT' : 'POST';
 
@@ -365,7 +366,7 @@ const AdminProducts = () => {
   const handleDelete = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        const response = await fetch(`/api/shop/products/${productId}`, {
+        const response = await fetch(buildApiUrl(`shop/products/${productId}`), {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

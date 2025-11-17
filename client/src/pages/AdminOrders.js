@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { buildApiUrl } from '../utils/apiConfig';
 import { 
-  FaShoppingCart, FaPlus, FaEdit, FaTrash, FaEye, FaSave, FaTimes, 
-  FaCheck, FaUsers, FaCalendar, FaMapMarkerAlt, FaClock, FaSearch, 
-  FaFilter, FaSync, FaDownload, FaUpload, FaUser, FaEnvelope, 
-  FaPhone, FaBox, FaTruck, FaCreditCard, FaCheckCircle, 
-  FaTimesCircle, FaExclamationTriangle, FaDollarSign, FaReceipt
+  FaShoppingCart, FaEye, FaSave, FaTimes, 
+  FaCheck, FaClock, FaSync, FaDownload, 
+  FaTruck, FaCheckCircle, 
+  FaTimesCircle, FaExclamationTriangle, FaDollarSign, FaReceipt, FaSpinner
 } from 'react-icons/fa';
 
 const Container = styled.div`
@@ -461,8 +462,11 @@ const OrderItem = styled.div`
 
 const AdminOrders = () => {
   const { getAdminToken } = useAdminAuth();
+  const { showSuccess, showError } = useNotification();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showModal, setShowModal] = useState(false);
@@ -480,163 +484,216 @@ const AdminOrders = () => {
     notes: ''
   });
 
-  // Sample orders data
-  const sampleOrders = [
-    {
-      id: 1,
-      orderNumber: 'ORD-2024-001',
-      customerName: 'Sarah Mwangi',
-      customerEmail: 'sarah.mwangi@email.com',
-      customerPhone: '+254720339204',
-      status: 'completed',
-      totalAmount: 2500,
-      shippingAddress: 'Nairobi, Kenya',
-      paymentMethod: 'M-Pesa',
-      orderDate: '2024-01-15',
-      items: [
-        { name: 'Leather Handbag', quantity: 1, price: 1500 },
-        { name: 'Fashion Accessories', quantity: 2, price: 1000 }
-      ],
-      notes: 'Delivered successfully',
-      createdAt: '2024-01-15',
-      updatedAt: '2024-01-20'
-    },
-    {
-      id: 2,
-      orderNumber: 'ORD-2024-002',
-      customerName: 'John Kiprop',
-      customerEmail: 'john.kiprop@email.com',
-      customerPhone: '+254720339204',
-      status: 'processing',
-      totalAmount: 1800,
-      shippingAddress: 'Kajiado, Kenya',
-      paymentMethod: 'PayPal',
-      orderDate: '2024-01-18',
-      items: [
-        { name: 'Custom Leather Wallet', quantity: 1, price: 1800 }
-      ],
-      notes: 'In production',
-      createdAt: '2024-01-18',
-      updatedAt: '2024-01-19'
-    },
-    {
-      id: 3,
-      orderNumber: 'ORD-2024-003',
-      customerName: 'Grace Akinyi',
-      customerEmail: 'grace.akinyi@email.com',
-      customerPhone: '+254720339204',
-      status: 'shipped',
-      totalAmount: 3200,
-      shippingAddress: 'Mombasa, Kenya',
-      paymentMethod: 'Bank Transfer',
-      orderDate: '2024-01-20',
-      items: [
-        { name: 'Leather Jacket', quantity: 1, price: 2500 },
-        { name: 'Leather Belt', quantity: 1, price: 700 }
-      ],
-      notes: 'Shipped via courier',
-      createdAt: '2024-01-20',
-      updatedAt: '2024-01-21'
-    },
-    {
-      id: 4,
-      orderNumber: 'ORD-2024-004',
-      customerName: 'Peter Ochieng',
-      customerEmail: 'peter.ochieng@email.com',
-      customerPhone: '+254720339204',
-      status: 'pending',
-      totalAmount: 1200,
-      shippingAddress: 'Kisumu, Kenya',
-      paymentMethod: 'M-Pesa',
-      orderDate: '2024-01-22',
-      items: [
-        { name: 'Leather Keychain Set', quantity: 3, price: 1200 }
-      ],
-      notes: 'Awaiting payment confirmation',
-      createdAt: '2024-01-22',
-      updatedAt: '2024-01-22'
-    }
-  ];
-
-  const statuses = ['all', 'pending', 'processing', 'shipped', 'completed', 'cancelled'];
-  const paymentMethods = ['M-Pesa', 'PayPal', 'Bank Transfer', 'Credit Card', 'Cash on Delivery'];
+  const statuses = ['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus]);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setOrders(sampleOrders);
+      const token = getAdminToken();
+      const params = new URLSearchParams();
+      if (filterStatus !== 'all') {
+        params.append('status', filterStatus);
+      }
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+
+      const response = await fetch(buildApiUrl(`admin/orders?${params.toString()}`), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Transform orders to match frontend format
+          const transformedOrders = (data.orders || []).map(order => ({
+            id: order._id,
+            _id: order._id,
+            orderNumber: order.orderNumber,
+            customerName: `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.trim(),
+            customerEmail: order.customer?.email || '',
+            customerPhone: order.customer?.phone || '',
+            status: order.status,
+            totalAmount: order.totalAmount || 0,
+            shippingAddress: order.shippingAddress ? 
+              `${order.shippingAddress.street || ''}, ${order.shippingAddress.city || ''}, ${order.shippingAddress.state || ''}`.trim() : '',
+            paymentMethod: order.paymentMethod || 'Unknown',
+            orderDate: order.orderDate ? new Date(order.orderDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            items: order.items || [],
+            notes: order.notes || '',
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+            customer: order.customer,
+            shippingAddressFull: order.shippingAddress
+          }));
+          setOrders(transformedOrders);
+        } else {
+          throw new Error(data.message || 'Failed to fetch orders');
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch orders');
+      }
     } catch (error) {
       console.error('Error fetching orders:', error);
+      showError('Failed to load orders', error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleViewOrder = (order) => {
-    setEditingOrder(order);
-    setFormData({
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone,
-      status: order.status,
-      totalAmount: order.totalAmount.toString(),
-      shippingAddress: order.shippingAddress,
-      paymentMethod: order.paymentMethod,
-      orderDate: order.orderDate,
-      notes: order.notes
-    });
-    setShowModal(true);
-  };
-
-  const handleUpdateStatus = async (orderId, newStatus) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId 
-        ? { ...order, status: newStatus, updatedAt: new Date().toISOString().split('T')[0] }
-        : order
-    ));
-  };
-
-  const handleSaveOrder = async () => {
+  const handleViewOrder = async (order) => {
     try {
-      if (editingOrder) {
-        setOrders(prev => prev.map(order => 
-          order.id === editingOrder.id 
-            ? { 
-                ...order, 
-                ...formData, 
-                totalAmount: parseFloat(formData.totalAmount),
-                updatedAt: new Date().toISOString().split('T')[0] 
-              }
-            : order
-        ));
+      const token = getAdminToken();
+      const response = await fetch(buildApiUrl(`admin/orders/${order._id || order.id}`), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const fullOrder = data.order;
+          setEditingOrder(fullOrder);
+          setFormData({
+            orderNumber: fullOrder.orderNumber,
+            customerName: `${fullOrder.customer?.firstName || ''} ${fullOrder.customer?.lastName || ''}`.trim(),
+            customerEmail: fullOrder.customer?.email || '',
+            customerPhone: fullOrder.customer?.phone || '',
+            status: fullOrder.status,
+            totalAmount: fullOrder.totalAmount?.toString() || '0',
+            shippingAddress: fullOrder.shippingAddress ? 
+              `${fullOrder.shippingAddress.street || ''}, ${fullOrder.shippingAddress.city || ''}, ${fullOrder.shippingAddress.state || ''}`.trim() : '',
+            paymentMethod: fullOrder.paymentMethod || 'Unknown',
+            orderDate: fullOrder.orderDate ? new Date(fullOrder.orderDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            notes: fullOrder.notes || ''
+          });
+          setShowModal(true);
+        }
       }
-      setShowModal(false);
     } catch (error) {
-      console.error('Error saving order:', error);
+      console.error('Error fetching order details:', error);
+      showError('Failed to load order details', error.message);
     }
   };
 
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    try {
+      setUpdatingStatus(orderId);
+      const token = getAdminToken();
+      
+      const response = await fetch(buildApiUrl(`admin/orders/${orderId}/status`), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          showSuccess('Order status updated successfully');
+          await fetchOrders();
+        } else {
+          throw new Error(data.message || 'Failed to update order status');
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      showError('Failed to update order status', error.message);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    if (!editingOrder) return;
+
+    try {
+      setSaving(true);
+      const token = getAdminToken();
+      
+      // Parse customer name into first and last name
+      const nameParts = formData.customerName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const updateData = {
+        customer: {
+          firstName,
+          lastName,
+          email: formData.customerEmail,
+          phone: formData.customerPhone
+        },
+        status: formData.status,
+        notes: formData.notes
+      };
+
+      const response = await fetch(buildApiUrl(`admin/orders/${editingOrder._id || editingOrder.id}`), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          showSuccess('Order updated successfully');
+          setShowModal(false);
+          await fetchOrders();
+        } else {
+          throw new Error(data.message || 'Failed to update order');
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update order');
+      }
+    } catch (error) {
+      console.error('Error saving order:', error);
+      showError('Failed to update order', error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Filter orders client-side for search (backend already filters by status)
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || order.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      order.orderNumber?.toLowerCase().includes(search) ||
+      order.customerName?.toLowerCase().includes(search) ||
+      order.customerEmail?.toLowerCase().includes(search) ||
+      order.customerPhone?.toLowerCase().includes(search)
+    );
   });
 
   const getStatusIcon = (status) => {
     switch(status) {
+      case 'delivered': return <FaCheckCircle />;
       case 'completed': return <FaCheckCircle />;
       case 'cancelled': return <FaTimesCircle />;
+      case 'refunded': return <FaTimesCircle />;
       case 'pending': return <FaClock />;
+      case 'confirmed': return <FaCheckCircle />;
       case 'processing': return <FaExclamationTriangle />;
       case 'shipped': return <FaTruck />;
       default: return <FaClock />;
@@ -738,18 +795,43 @@ const AdminOrders = () => {
                   <FaEye />
                 </ActionButton>
                 {order.status === 'pending' && (
-                  <ActionButton variant="process" onClick={() => handleUpdateStatus(order.id, 'processing')}>
-                    <FaCheck />
+                  <ActionButton 
+                    variant="process" 
+                    onClick={() => handleUpdateStatus(order._id || order.id, 'confirmed')}
+                    disabled={updatingStatus === (order._id || order.id)}
+                    title="Confirm Order"
+                  >
+                    {updatingStatus === (order._id || order.id) ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaCheck />}
+                  </ActionButton>
+                )}
+                {(order.status === 'confirmed' || order.status === 'pending') && (
+                  <ActionButton 
+                    variant="process" 
+                    onClick={() => handleUpdateStatus(order._id || order.id, 'processing')}
+                    disabled={updatingStatus === (order._id || order.id)}
+                    title="Start Processing"
+                  >
+                    {updatingStatus === (order._id || order.id) ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaExclamationTriangle />}
                   </ActionButton>
                 )}
                 {order.status === 'processing' && (
-                  <ActionButton variant="ship" onClick={() => handleUpdateStatus(order.id, 'shipped')}>
-                    <FaTruck />
+                  <ActionButton 
+                    variant="ship" 
+                    onClick={() => handleUpdateStatus(order._id || order.id, 'shipped')}
+                    disabled={updatingStatus === (order._id || order.id)}
+                    title="Mark as Shipped"
+                  >
+                    {updatingStatus === (order._id || order.id) ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaTruck />}
                   </ActionButton>
                 )}
-                {(order.status === 'pending' || order.status === 'processing') && (
-                  <ActionButton variant="cancel" onClick={() => handleUpdateStatus(order.id, 'cancelled')}>
-                    <FaTimes />
+                {(order.status === 'pending' || order.status === 'confirmed' || order.status === 'processing') && (
+                  <ActionButton 
+                    variant="cancel" 
+                    onClick={() => handleUpdateStatus(order._id || order.id, 'cancelled')}
+                    disabled={updatingStatus === (order._id || order.id)}
+                    title="Cancel Order"
+                  >
+                    {updatingStatus === (order._id || order.id) ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaTimes />}
                   </ActionButton>
                 )}
               </ActionButtons>
@@ -845,10 +927,12 @@ const AdminOrders = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
                 >
                   <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
                   <option value="processing">Processing</option>
                   <option value="shipped">Shipped</option>
-                  <option value="completed">Completed</option>
+                  <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
+                  <option value="refunded">Refunded</option>
                 </Select>
               </FormGroup>
             </div>
@@ -861,17 +945,17 @@ const AdminOrders = () => {
               />
             </FormGroup>
 
-            {editingOrder && (
+            {editingOrder && editingOrder.items && (
               <OrderItems>
                 <h4 style={{ margin: '0 0 1rem 0', color: '#667eea' }}>Order Items</h4>
                 {editingOrder.items.map((item, index) => (
                   <OrderItem key={index}>
                     <div>
-                      <div style={{ fontWeight: '600' }}>{item.name}</div>
+                      <div style={{ fontWeight: '600' }}>{item.name || (item.product?.name || 'Unknown Product')}</div>
                       <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Qty: {item.quantity}</div>
                     </div>
                     <div style={{ fontWeight: '600', color: '#667eea' }}>
-                      KES {item.price.toLocaleString()}
+                      KES {(item.price || item.total || 0).toLocaleString()}
                     </div>
                   </OrderItem>
                 ))}
@@ -886,7 +970,7 @@ const AdminOrders = () => {
                   fontSize: '1.1rem'
                 }}>
                   <span>Total:</span>
-                  <span style={{ color: '#667eea' }}>KES {editingOrder.totalAmount.toLocaleString()}</span>
+                  <span style={{ color: '#667eea' }}>KES {(editingOrder.totalAmount || 0).toLocaleString()}</span>
                 </div>
               </OrderItems>
             )}
@@ -905,9 +989,9 @@ const AdminOrders = () => {
                 <FaTimes />
                 Close
               </Button>
-              <Button onClick={handleSaveOrder}>
-                <FaSave />
-                Update Order
+              <Button onClick={handleSaveOrder} disabled={saving}>
+                {saving ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaSave />}
+                {saving ? 'Updating...' : 'Update Order'}
               </Button>
             </div>
           </ModalContent>

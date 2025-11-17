@@ -49,7 +49,8 @@ const authenticateAdmin = (req, res, next) => {
       });
     }
     
-    if (decoded.role !== 'admin') {
+    // Allow both admin and super_admin roles
+    if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
       return res.status(403).json({ 
         success: false, 
         message: 'Admin access required' 
@@ -67,7 +68,46 @@ const authenticateAdmin = (req, res, next) => {
   });
 };
 
+const authenticateSuperAdmin = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Access token required' 
+    });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Invalid or expired token' 
+      });
+    }
+    
+    // Only super_admin can access this route
+    if (decoded.role !== 'super_admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Super admin access required. Only super admins can perform this action.' 
+      });
+    }
+    
+    // Ensure we have the user ID and other necessary fields
+    req.user = {
+      userId: decoded.userId || decoded.id,
+      _id: decoded.userId || decoded.id,
+      email: decoded.email,
+      role: decoded.role
+    };
+    next();
+  });
+};
+
 module.exports = {
   authenticateToken,
-  authenticateAdmin
+  authenticateAdmin,
+  authenticateSuperAdmin
 };

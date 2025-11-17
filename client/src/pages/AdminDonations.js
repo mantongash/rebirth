@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaDownload, FaSearch, FaSync, FaEye, FaMoneyBillWave, FaFilter, FaCalendarAlt, FaUser, FaCreditCard, FaCheckCircle, FaClock, FaTimes } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 2rem;
@@ -361,7 +362,7 @@ export default function AdminDonations() {
       setError('');
       
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const params = new URLSearchParams({
         page: currentPage,
@@ -410,7 +411,7 @@ export default function AdminDonations() {
   const handleExport = async () => {
     try {
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const params = new URLSearchParams({
         format: 'csv',

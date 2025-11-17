@@ -16,6 +16,7 @@ import {
   FaYoutube, 
   FaCalendarAlt 
 } from 'react-icons/fa';
+import { getApiUrl } from '../utils/apiConfig';
 
 // Styled Components
 const Page = styled.div`
@@ -477,8 +478,7 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE}/contact`, {
+      const response = await fetch(`${getApiUrl()}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

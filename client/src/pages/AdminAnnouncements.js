@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaBullhorn, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaBullhorn, FaPlus, FaTrash, FaSpinner, FaExclamationCircle } from 'react-icons/fa';
+import { useAdminAuth } from '../context/AdminAuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 2rem;
@@ -66,8 +69,13 @@ const AddButton = styled.button`
   gap: 0.5rem;
   transition: background 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #5a67d8;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -90,6 +98,7 @@ const AnnouncementItem = styled.div`
 const AnnouncementText = styled.div`
   color: #333;
   font-size: 1rem;
+  flex: 1;
 `;
 
 const DeleteButton = styled.button`
@@ -100,9 +109,17 @@ const DeleteButton = styled.button`
   padding: 0.5rem;
   border-radius: 4px;
   transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #fee2e2;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -117,26 +134,159 @@ const EmptyState = styled.div`
   }
 `;
 
-const initialAnnouncements = [
-  { id: 1, text: 'System maintenance scheduled for July 25th.' },
-  { id: 2, text: 'New donation report feature released!' },
-];
+const LoadingState = styled.div`
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+`;
+
+const ErrorMessage = styled.div`
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
 
 export default function AdminAnnouncements() {
-  const [announcements, setAnnouncements] = useState(initialAnnouncements);
+  const { getAdminToken } = useAdminAuth();
+  const { showSuccess, showError } = useNotification();
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(null);
+  const [error, setError] = useState('');
   const [newAnnouncement, setNewAnnouncement] = useState('');
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (newAnnouncement.trim()) {
-      setAnnouncements([{ id: Date.now(), text: newAnnouncement }, ...announcements]);
-      setNewAnnouncement('');
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const token = getAdminToken();
+      
+      const response = await fetch(buildApiUrl(`admin/content?type=announcement&status=published`), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Handle both array and object with content property
+        const contentList = Array.isArray(data) ? data : (data.content || []);
+        setAnnouncements(contentList);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch announcements');
+      }
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+      setError(err.message || 'Failed to load announcements');
+      showError('Failed to load announcements', err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = (id) => {
-    setAnnouncements(announcements.filter(a => a.id !== id));
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!newAnnouncement.trim()) {
+      showError('Please enter an announcement');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const token = getAdminToken();
+      
+      const response = await fetch(buildApiUrl('admin/content'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: newAnnouncement.trim(),
+          content: newAnnouncement.trim(),
+          type: 'announcement',
+          status: 'published',
+          isPublic: true
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showSuccess('Announcement added successfully');
+        setNewAnnouncement('');
+        await fetchAnnouncements();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add announcement');
+      }
+    } catch (err) {
+      console.error('Error adding announcement:', err);
+      showError('Failed to add announcement', err.message);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this announcement?')) {
+      return;
+    }
+
+    try {
+      setDeleting(id);
+      const token = getAdminToken();
+      
+      const response = await fetch(buildApiUrl(`admin/content/${id}`), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        showSuccess('Announcement deleted successfully');
+        await fetchAnnouncements();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete announcement');
+      }
+    } catch (err) {
+      console.error('Error deleting announcement:', err);
+      showError('Failed to delete announcement', err.message);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container>
+        <AnnouncementsCard>
+          <LoadingState>
+            <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+            Loading announcements...
+          </LoadingState>
+        </AnnouncementsCard>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -146,18 +296,28 @@ export default function AdminAnnouncements() {
           Announcements
         </Title>
         <Divider />
+        
+        {error && (
+          <ErrorMessage>
+            <FaExclamationCircle />
+            {error}
+          </ErrorMessage>
+        )}
+
         <Form onSubmit={handleAdd}>
           <Input
             type="text"
             placeholder="New announcement"
             value={newAnnouncement}
             onChange={e => setNewAnnouncement(e.target.value)}
+            disabled={saving}
           />
-          <AddButton type="submit">
-            <FaPlus />
-            Add
+          <AddButton type="submit" disabled={saving || !newAnnouncement.trim()}>
+            {saving ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : <FaPlus />}
+            {saving ? 'Adding...' : 'Add'}
           </AddButton>
         </Form>
+        
         <AnnouncementsList>
           {announcements.length === 0 ? (
             <EmptyState>
@@ -166,10 +326,18 @@ export default function AdminAnnouncements() {
             </EmptyState>
           ) : (
             announcements.map((announcement) => (
-              <AnnouncementItem key={announcement.id}>
-                <AnnouncementText>{announcement.text}</AnnouncementText>
-                <DeleteButton onClick={() => handleDelete(announcement.id)} title="Delete">
-                  <FaTrash />
+              <AnnouncementItem key={announcement._id || announcement.id}>
+                <AnnouncementText>{announcement.title || announcement.content}</AnnouncementText>
+                <DeleteButton 
+                  onClick={() => handleDelete(announcement._id || announcement.id)} 
+                  title="Delete"
+                  disabled={deleting === (announcement._id || announcement.id)}
+                >
+                  {deleting === (announcement._id || announcement.id) ? (
+                    <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                  ) : (
+                    <FaTrash />
+                  )}
                 </DeleteButton>
               </AnnouncementItem>
             ))
@@ -178,4 +346,4 @@ export default function AdminAnnouncements() {
       </AnnouncementsCard>
     </Container>
   );
-} 
+}

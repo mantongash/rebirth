@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { getBaseUrl } from '../utils/apiConfig';
 
 // Custom SVG Icons - Professional Size
 const GoogleIcon = () => (
@@ -580,6 +581,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
+
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -605,7 +607,7 @@ const Login = () => {
     try {
       if (provider === 'Google') {
         // Redirect to Google OAuth
-        window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/google`;
+        window.location.href = `${getBaseUrl()}/api/auth/google`;
       } else {
         // For other providers, show coming soon message
         setTimeout(() => {

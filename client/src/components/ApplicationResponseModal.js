@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FaEnvelope, FaSms, FaTimes, FaPaperPlane, FaUser, FaPhone, FaCalendar } from 'react-icons/fa';
 import { useNotification } from '../context/NotificationContext';
+import { getApiUrl } from '../utils/apiConfig';
 
 const ApplicationResponseModal = ({ application, isOpen, onClose, onResponseSent }) => {
   const [emailResponse, setEmailResponse] = useState({
@@ -43,7 +44,7 @@ const ApplicationResponseModal = ({ application, isOpen, onClose, onResponseSent
 
     try {
       const token = localStorage.getItem('adminToken');
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
 
       const response = await fetch(`${API_BASE}/admin/applications/${application._id}/respond`, {
         method: 'POST',

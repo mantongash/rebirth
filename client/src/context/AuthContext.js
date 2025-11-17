@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { getBaseUrl } from '../utils/apiConfig';
 
 const AuthContext = createContext();
 
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     error: null
   });
 
-  const API_BASE = process.env.REACT_APP_API_URL || '';
+  const API_BASE = getBaseUrl() || '';
 
   // Check for existing token on app load and hydrate user from server if needed
   useEffect(() => {

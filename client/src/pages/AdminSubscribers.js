@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const AdminSubscribers = () => {
   const [subscribers, setSubscribers] = useState([]);
@@ -18,7 +19,7 @@ const AdminSubscribers = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/newsletter', { headers: authHeaders });
+      const res = await fetch(buildApiUrl('newsletter'), { headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to load');
       setSubscribers(Array.isArray(data.data) ? data.data : []);
@@ -50,7 +51,7 @@ const AdminSubscribers = () => {
     if (!subject || !html) return;
     setSending(true);
     try {
-      const res = await fetch('/api/newsletter/send', {
+      const res = await fetch(buildApiUrl('newsletter/send'), {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({ subject, html })

@@ -1,9 +1,10 @@
 // src/api.js
 import axios from 'axios';
+import { getApiUrl } from './utils/apiConfig';
 
 // Simple API configuration
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api/users',
+  baseURL: `${getApiUrl()}/users`,
   timeout: 15000, // 15 second timeout
 });
 
@@ -15,7 +16,7 @@ API.interceptors.request.use((config) => {
 
 // Main API instance for general backend endpoints
 export const API_MAIN = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: getApiUrl(),
   timeout: 15000, // 15 second timeout
 });
 

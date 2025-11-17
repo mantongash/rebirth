@@ -50,6 +50,26 @@ class CartCleanupService {
    */
   async cleanupExpiredCarts() {
     try {
+      // Wait for MongoDB connection if not ready
+      const mongoose = require('mongoose');
+      if (mongoose.connection.readyState !== 1) {
+        console.log('Waiting for MongoDB connection before cleanup...');
+        // Wait up to 30 seconds for connection
+        let attempts = 0;
+        while (mongoose.connection.readyState !== 1 && attempts < 30) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          attempts++;
+        }
+        if (mongoose.connection.readyState !== 1) {
+          console.log('MongoDB not connected, skipping cleanup');
+          return {
+            success: false,
+            error: 'Database not connected',
+            timestamp: new Date()
+          };
+        }
+      }
+
       console.log('Starting cart and favorites cleanup process...');
       const now = new Date();
       const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));

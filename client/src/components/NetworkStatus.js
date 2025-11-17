@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import { getBaseUrl } from '../utils/apiConfig';
 
 const StatusContainer = styled.div`
   position: fixed;
@@ -36,7 +37,7 @@ const NetworkStatus = () => {
   const checkServerHealth = async () => {
     try {
       setStatus('checking');
-      const response = await axios.get('http://localhost:5000/health', {
+      const response = await axios.get(`${getBaseUrl()}/health`, {
         timeout: 5000
       });
       

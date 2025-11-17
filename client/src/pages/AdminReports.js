@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaChartBar, FaMoneyBillWave, FaChartLine, FaUsers, FaFileAlt, FaDownload, FaCalendarAlt, FaFilter, FaSync, FaChartArea, FaChartPie, FaUserPlus, FaDonate, FaCheckCircle, FaClock } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
   padding: 2rem;
@@ -315,7 +316,7 @@ export default function AdminReports() {
       setError('');
       
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const params = new URLSearchParams({
         type: reportType,
@@ -352,7 +353,7 @@ export default function AdminReports() {
   const handleExport = async () => {
     try {
       const token = getAdminToken();
-      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE = getApiUrl();
       
       const params = new URLSearchParams({
         type: reportType,

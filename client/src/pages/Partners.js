@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 const Hero = styled.section`
-  background: url('/images/branding/about-hero.jpg') center/cover no-repeat;
+  background: url('https://res.cloudinary.com/YOUR_CLOUD/image/upload/v123/about-hero.jpg') center/cover no-repeat;
   min-height: 220px;
   display: flex;
   align-items: center;
@@ -11,27 +11,32 @@ const Hero = styled.section`
   color: #fff;
   text-shadow: 0 2px 8px #0008;
 `;
+
 const HeroTitle = styled.h1`
   font-size: 2.2rem;
   font-weight: 900;
 `;
+
 const Section = styled.section`
   max-width: 900px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
 `;
+
 const SectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 800;
   margin-bottom: 1.2rem;
   color: ${({ theme }) => theme.palette.primary.main};
 `;
+
 const PartnersGrid = styled.div`
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
   justify-content: center;
 `;
+
 const PartnerLogo = styled.img`
   width: 120px;
   height: auto;
@@ -40,18 +45,35 @@ const PartnerLogo = styled.img`
   box-shadow: 0 2px 8px #0001;
   padding: 1rem;
 `;
+
 const Partners = () => (
   <>
-    <Hero as={motion.section} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }}>
+    <Hero
+      as={motion.section}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7 }}
+    >
       <HeroTitle>Our Partners</HeroTitle>
     </Hero>
+
     <Section>
       <SectionTitle>Partners</SectionTitle>
       <PartnersGrid>
-        <PartnerLogo src={'/images/branding/logo-1.png'} alt="Partner 1" />
-        <PartnerLogo src={'/images/branding/logo-1.png'} alt="Partner 2" />
-        <PartnerLogo src={'/images/branding/logo-1.png'} alt="Partner 3" />
+        <PartnerLogo
+          src="https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg"
+          alt="Partner 1"
+        />
+        <PartnerLogo
+          src="https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg"
+          alt="Partner 2"
+        />
+        <PartnerLogo
+          src="https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg"
+          alt="Partner 3"
+        />
       </PartnersGrid>
+
       <SectionTitle>Why Partner With Us?</SectionTitle>
       <ul>
         <li>Make a lasting impact in communities</li>
@@ -61,4 +83,5 @@ const Partners = () => (
     </Section>
   </>
 );
-export default Partners; 
+
+export default Partners;

@@ -5,7 +5,7 @@ import { useAdminAuth } from '../context/AdminAuthContext';
 import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 1.9rem;
   max-width: 1400px;
   margin: 0 auto;
 `;

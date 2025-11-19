@@ -188,7 +188,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
               padding: '0.75rem',
               border: 'none',
               borderRadius: '6px',
-              fontSize: '1rem',
+              fontSize: '0.9rem',
               fontWeight: '500',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               marginBottom: '1rem',

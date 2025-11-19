@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FaDonate, FaHeart, FaTimes } from 'react-icons/fa';
+import { buildApiUrl } from '../utils/apiConfig';
 
 const FloatingButton = styled.div`
   position: fixed;
@@ -156,6 +157,7 @@ const CloseButton = styled.button`
 const FloatingDonateButton = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [showQuickDonate, setShowQuickDonate] = useState(false);
+  const [quickDonateAmounts, setQuickDonateAmounts] = useState([10, 25, 50]);
 
   useEffect(() => {
     // Check if user has previously dismissed the button
@@ -163,7 +165,22 @@ const FloatingDonateButton = () => {
     if (dismissed === 'true') {
       setIsVisible(false);
     }
+    
+    // Fetch quick donate amounts from settings
+    fetchDonationSettings();
   }, []);
+
+  const fetchDonationSettings = async () => {
+    try {
+      const response = await fetch(buildApiUrl('settings/donations'));
+      const data = await response.json();
+      if (data.success && data.data.quickDonateAmounts) {
+        setQuickDonateAmounts(data.data.quickDonateAmounts);
+      }
+    } catch (error) {
+      console.error('Error fetching donation settings:', error);
+    }
+  };
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -185,15 +202,11 @@ const FloatingDonateButton = () => {
           gap: '8px',
           marginBottom: '10px'
         }}>
-          <QuickDonateButton onClick={() => window.open('/donate?amount=10', '_blank')}>
-            <FaHeart /> $10
-          </QuickDonateButton>
-          <QuickDonateButton onClick={() => window.open('/donate?amount=25', '_blank')}>
-            <FaHeart /> $25
-          </QuickDonateButton>
-          <QuickDonateButton onClick={() => window.open('/donate?amount=50', '_blank')}>
-            <FaHeart /> $50
-          </QuickDonateButton>
+          {quickDonateAmounts.map((amount) => (
+            <QuickDonateButton key={amount} onClick={() => window.open(`/donate?amount=${amount}`, '_blank')}>
+              <FaHeart /> ${amount}
+            </QuickDonateButton>
+          ))}
         </div>
       )}
       

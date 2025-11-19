@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import CountUp from 'react-countup';
+import { buildApiUrl } from '../utils/apiConfig';
 import { 
   FaHeart, 
   FaUsers, 
@@ -24,6 +25,30 @@ import {
 const GetInvolved = () => {
   const countersRef = useRef(null);
   const isInView = useInView(countersRef, { once: true });
+  
+  useEffect(() => {
+    fetchDonationSettings();
+  }, []);
+
+  const fetchDonationSettings = async () => {
+    try {
+      const response = await fetch(buildApiUrl('settings/donations'));
+      const data = await response.json();
+      if (data.success && data.data.donationOptions) {
+        // Map the donation options to include icons
+        const optionsWithIcons = data.data.donationOptions.map((option, index) => {
+          const icons = [FaHeart, FaStar, FaRocket, FaGift];
+          return {
+            ...option,
+            icon: icons[index] || FaHeart
+          };
+        });
+        setDonationOptions(optionsWithIcons);
+      }
+    } catch (error) {
+      console.error('Error fetching donation settings:', error);
+    }
+  };
 
   const volunteerStats = [
     { number: 150, label: 'Active Volunteers', icon: FaUsers },
@@ -70,7 +95,7 @@ const GetInvolved = () => {
     }
   ];
 
-  const donationOptions = [
+  const [donationOptions, setDonationOptions] = useState([
     {
       title: 'Monthly Donor',
       amount: '1,000 KES',
@@ -99,7 +124,7 @@ const GetInvolved = () => {
       icon: FaGift,
       impact: 'Provides comprehensive support for 5 women'
     }
-  ];
+  ]);
 
   return (
     <>

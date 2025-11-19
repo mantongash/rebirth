@@ -241,7 +241,7 @@ const ContactCallout = styled.div`
 
 
 const Donate = () => {
-  const [selectedAmount, setSelectedAmount] = useState(25);
+  const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState("");
   const [isMonthly, setIsMonthly] = useState(false);
   const [activeTab, setActiveTab] = useState("");
@@ -258,9 +258,19 @@ const Donate = () => {
     totalDonations: 0,
     recentDonors: []
   });
+  const [donationSettings, setDonationSettings] = useState({
+    goal: 100000,
+    presetAmounts: [5, 10, 20, 50, 100],
+    defaultAmount: 25,
+    impactExamples: [
+      { amount: 25, text: 'School supplies for a girl' },
+      { amount: 50, text: 'Feeds a family for a month' },
+      { amount: 100, text: 'Installs a handwashing station' }
+    ]
+  });
 
-  const goal = 100000; // $100,000 goal
-  const progress = (donationStats.totalRaised / goal) * 100;
+  const goal = donationSettings.goal;
+  const progress = goal > 0 ? (donationStats.totalRaised / goal) * 100 : 0;
 
   const fetchDonationStats = async () => {
     try {
@@ -310,11 +320,29 @@ const Donate = () => {
     }
   };
 
+  const fetchDonationSettings = async () => {
+    try {
+      const response = await fetch(buildApiUrl('settings/donations'));
+      const data = await response.json();
+      if (data.success) {
+        setDonationSettings(data.data);
+        // Set default selected amount from settings
+        if (!selectedAmount) {
+          setSelectedAmount(data.data.defaultAmount);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching donation settings:', error);
+    }
+  };
+
   // Fetch donation statistics and payment methods on component mount
   useEffect(() => {
+    fetchDonationSettings();
     fetchDonationStats();
     fetchPaymentMethods();
     fetchPaystackConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchPaymentMethods]);
 
 
@@ -362,7 +390,7 @@ const Donate = () => {
 
     setLoading(true);
     try {
-      const amount = customAmount || selectedAmount || 10;
+      const amount = customAmount || selectedAmount || donationSettings.defaultAmount || 10;
       console.log('Initializing unified payment:', { amount, paymentMethod, email, firstName, lastName, phone });
 
       const response = await fetch(buildApiUrl('payments/initialize'), {
@@ -524,7 +552,7 @@ Please keep this reference number for your records.
         <AmountSection>
           <h3 style={{ color: "#7c3aed" }}>Choose your amount</h3>
           <AmountButtons>
-            {[5, 10, 20, 50,100].map((amt) => (
+            {donationSettings.presetAmounts.map((amt) => (
               <AmountButton
                 key={amt}
                 selected={selectedAmount === amt && !customAmount}
@@ -692,7 +720,7 @@ Please keep this reference number for your records.
                   fontSize: "1rem"
                 }}
               >
-                {loading ? "Processing..." : `Pay ${getCurrencySymbol(method.id)}${customAmount || selectedAmount || 10} with ${method.name}`}
+                {loading ? "Processing..." : `Pay ${getCurrencySymbol(method.id)}${customAmount || selectedAmount || donationSettings.defaultAmount || 10} with ${method.name}`}
               </button>
               
               {!method.configured && (
@@ -720,13 +748,9 @@ Please keep this reference number for your records.
         <ImpactSection>
           <ImpactTitle>Impact of Your Gift</ImpactTitle>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
-            {[
-              { amt: 25, text: 'School supplies for a girl' },
-              { amt: 50, text: 'Feeds a family for a month' },
-              { amt: 100, text: 'Installs a handwashing station' }
-            ].map((i) => (
-              <div key={i.amt} style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.8rem', textAlign: 'center' }}>
-                <div style={{ fontWeight: 800, color: '#166534' }}>${i.amt}</div>
+            {donationSettings.impactExamples.map((i) => (
+              <div key={i.amount} style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: 10, padding: '0.8rem', textAlign: 'center' }}>
+                <div style={{ fontWeight: 800, color: '#166534' }}>${i.amount}</div>
                 <div style={{ fontSize: '0.9rem', color: '#166534' }}>{i.text}</div>
               </div>
             ))}

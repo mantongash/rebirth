@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaUsers, FaDonate, FaBox, FaShoppingCart, FaChartBar, FaChartLine, FaBell, FaUserPlus, FaHandsHelping, FaGraduationCap, FaEnvelope, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaUsers, FaDonate, FaBox, FaShoppingCart, FaChartBar, FaChartLine, FaBell, FaUserPlus, FaHandsHelping, FaGraduationCap, FaEnvelope, FaArrowUp } from 'react-icons/fa';
+import { buildApiUrl } from '../utils/apiConfig';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -197,22 +198,54 @@ const ActivityTime = styled.div`
 `;
 
 const AdminDashboard = () => {
-  const [dashboard] = useState({
-    totalUsers: 1247,
-    totalDonations: 45680,
-    totalProducts: 89,
-    totalOrders: 234,
-    donationStats: { totalAmount: 45680, completedDonations: 89, pendingDonations: 12 },
-    userStats: { activeUsers: 892, verifiedUsers: 1105 },
+  const [dashboard, setDashboard] = useState({
+    totalUsers: 0,
+    totalDonations: 0,
+    totalProducts: 0,
+    totalOrders: 0,
+    donationStats: { totalAmount: 0, completedDonations: 0, pendingDonations: 0 },
+    userStats: { activeUsers: 0, verifiedUsers: 0 },
+    monthlyUsers: [],
+    monthlyDonations: []
   });
+  const [, setLoading] = useState(true);
 
-  // Chart data
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(buildApiUrl('admin/dashboard'), {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setDashboard(data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Chart data - using real data from API
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
   const revenueData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: dashboard.monthlyDonations?.map(item => {
+      const monthIndex = item._id?.month - 1;
+      return monthIndex >= 0 ? monthNames[monthIndex] : '';
+    }).filter(Boolean) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
       {
         label: 'Revenue',
-        data: [12000, 19000, 15000, 25000, 22000, 30000],
+        data: dashboard.monthlyDonations?.map(item => item.amount || 0) || [0, 0, 0, 0, 0, 0],
         borderColor: 'rgba(102, 126, 234, 1)',
         backgroundColor: 'rgba(102, 126, 234, 0.1)',
         tension: 0.4,
@@ -222,11 +255,14 @@ const AdminDashboard = () => {
   };
 
   const userGrowthData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: dashboard.monthlyUsers?.map(item => {
+      const monthIndex = item._id?.month - 1;
+      return monthIndex >= 0 ? monthNames[monthIndex] : '';
+    }).filter(Boolean) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
       {
         label: 'New Users',
-        data: [65, 78, 90, 81, 95, 105],
+        data: dashboard.monthlyUsers?.map(item => item.count || 0) || [0, 0, 0, 0, 0, 0],
         backgroundColor: 'rgba(102, 126, 234, 0.8)',
         borderColor: 'rgba(102, 126, 234, 1)',
         borderWidth: 1,
@@ -234,11 +270,13 @@ const AdminDashboard = () => {
     ],
   };
 
+  // For donation sources, we'll use a simplified version since we don't have that data
+  // In a real implementation, you'd fetch this from the API
   const donationSourcesData = {
     labels: ['Online', 'Mobile', 'Bank Transfer', 'Cash'],
     datasets: [
       {
-        data: [45, 25, 20, 10],
+        data: [45, 25, 20, 10], // This would come from API in production
         backgroundColor: [
           'rgba(102, 126, 234, 0.8)',
           'rgba(118, 75, 162, 0.8)',
@@ -323,7 +361,7 @@ const AdminDashboard = () => {
           <StatLabel>Total Users</StatLabel>
           <StatChange positive>
             <FaArrowUp />
-            +12% from last month
+            {dashboard.userStats?.activeUsers > 0 ? `${Math.round((dashboard.userStats.activeUsers / dashboard.totalUsers) * 100)}% active` : 'No data'}
           </StatChange>
         </StatCard>
 
@@ -337,7 +375,7 @@ const AdminDashboard = () => {
           <StatLabel>Total Donations</StatLabel>
           <StatChange positive>
             <FaArrowUp />
-            +8% from last month
+            {dashboard.donationStats?.completedDonations > 0 ? `${dashboard.donationStats.completedDonations} completed` : 'No donations'}
           </StatChange>
         </StatCard>
 
@@ -351,7 +389,7 @@ const AdminDashboard = () => {
           <StatLabel>Products</StatLabel>
           <StatChange positive>
             <FaArrowUp />
-            +5% from last month
+            Active products
           </StatChange>
         </StatCard>
 
@@ -363,9 +401,9 @@ const AdminDashboard = () => {
           </StatHeader>
           <StatValue>{dashboard.totalOrders}</StatValue>
           <StatLabel>Orders</StatLabel>
-          <StatChange negative>
-            <FaArrowDown />
-            -3% from last month
+          <StatChange positive>
+            <FaArrowUp />
+            Total orders
           </StatChange>
         </StatCard>
       </StatsGrid>

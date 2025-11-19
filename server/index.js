@@ -195,6 +195,8 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+const settingsRoutes = require('./routes/settings');
+app.use('/api/settings', settingsRoutes);
 
 // Public gallery endpoint
 app.get('/api/gallery', async (req, res) => {

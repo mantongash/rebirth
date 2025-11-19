@@ -4,7 +4,7 @@ import { FaSave, FaCheckCircle, FaSpinner, FaExclamationCircle } from 'react-ico
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBaseUrl } from '../utils/apiConfig';
-import logo from "../assets/logo-1.png";
+import logo from "../asset/logo-1.png";
 
 const Container = styled.div`
   min-height: 100vh;

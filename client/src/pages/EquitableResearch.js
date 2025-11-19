@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaSearch, FaUsers, FaChartLine, FaLightbulb, FaHandshake, FaStar, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaClock, FaBullseye, FaGlobe, FaMedal, FaBook, FaLaptop, FaMicrophone, FaUsersCog, FaRocket, FaPalette, FaDumbbell, FaRunning, FaBasketballBall, FaVolleyballBall, FaHospital, FaUserMd, FaBaby, FaPills, FaThermometerHalf, FaFlask, FaGraduationCap, FaUniversity, FaFileAlt, FaClipboardList } from 'react-icons/fa';
+import { FaSearch, FaUsers, FaChartLine, FaStar, FaArrowRight, FaClock, FaFlask, FaGraduationCap, FaUniversity, FaFileAlt, FaClipboardList, FaLaptop } from 'react-icons/fa';
 
 const Page = styled.div`
   min-height: 100vh;

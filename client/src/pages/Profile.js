@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -90,20 +90,6 @@ const Input = styled.input`
   }
 `;
 
-const TextArea = styled.textarea`
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  min-height: 100px;
-  resize: vertical;
-  transition: border-color 0.2s;
-  
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-`;
 
 const ButtonGroup = styled.div`
   display: flex;

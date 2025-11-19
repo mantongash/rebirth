@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaNewspaper, FaCalendar, FaUser } from 'react-icons/fa';
+import { FaCalendar, FaUser } from 'react-icons/fa';
 
 const Page = styled.div`
   min-height: 100vh;

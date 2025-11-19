@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaBook, FaDownload, FaFilePdf, FaVideo, FaPhone, FaEnvelope, FaHandsHelping, FaHeart, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
+import { FaBook, FaDownload, FaVideo, FaPhone, FaEnvelope, FaHandsHelping, FaHeart, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
 
 const Container = styled.div`
   min-height: 100vh;

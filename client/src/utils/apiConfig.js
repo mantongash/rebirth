@@ -58,7 +58,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 export const API_BASE_URL = getApiBaseUrl();
 export const API_URL = getApiUrl();
 
-export default {
+const apiConfig = {
   getApiUrl,
   getBaseUrl,
   buildApiUrl,
@@ -66,4 +66,6 @@ export default {
   API_BASE_URL,
   API_URL,
 };
+
+export default apiConfig;
 

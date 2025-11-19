@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { FaChartBar, FaMoneyBillWave, FaChartLine, FaUsers, FaFileAlt, FaDownload, FaCalendarAlt, FaFilter, FaSync, FaChartArea, FaChartPie, FaUserPlus, FaDonate, FaCheckCircle, FaClock } from 'react-icons/fa';
+import { FaChartBar, FaMoneyBillWave, FaChartLine, FaUsers, FaDownload, FaFilter, FaSync, FaChartArea, FaUserPlus, FaDonate, FaCheckCircle } from 'react-icons/fa';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { getApiUrl } from '../utils/apiConfig';
 
@@ -310,7 +310,7 @@ export default function AdminReports() {
 
   const { getAdminToken } = useAdminAuth();
 
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -344,11 +344,11 @@ export default function AdminReports() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reportType, period, startDate, endDate, getAdminToken]);
 
   useEffect(() => {
     fetchReportData();
-  }, [reportType, period, startDate, endDate]);
+  }, [fetchReportData]);
 
   const handleExport = async () => {
     try {
@@ -395,14 +395,6 @@ export default function AdminReports() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
   };
 
   const getDonorInitials = (firstName, lastName) => {

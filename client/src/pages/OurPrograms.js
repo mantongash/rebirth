@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { 
   FaBook, FaHandsHelping, FaFutbol, FaLightbulb, FaCamera, FaShoePrints,
-  FaGraduationCap, FaUsers, FaClock, FaMapMarkerAlt, FaPhoneAlt, 
+  FaGraduationCap, FaUsers, FaMapMarkerAlt, FaPhoneAlt, 
   FaEnvelope, FaUser, FaCalendarAlt, FaFileAlt, FaCheckCircle,
-  FaArrowRight, FaStar, FaHeart, FaShieldAlt, FaRocket, FaAward
+  FaArrowRight, FaAward
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
@@ -399,7 +399,6 @@ const StatLabel = styled.div`
 `;
 
 const OurPrograms = () => {
-  const [selectedProgram, setSelectedProgram] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',

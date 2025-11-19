@@ -1,21 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
-  FaCalendarAlt, 
-  FaMapMarkerAlt, 
-  FaUsers, 
-  FaHeart, 
-  FaGraduationCap,
   FaTrophy,
   FaStar,
   FaArrowRight,
-  FaPlay,
-  FaQuoteLeft,
-  FaLightbulb,
   FaHandshake,
   FaGlobe,
-  FaChartLine,
   FaAward,
   FaSeedling
 } from 'react-icons/fa';

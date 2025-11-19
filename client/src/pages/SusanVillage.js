@@ -7,11 +7,9 @@ import ProgramBreadcrumb from '../components/ProgramBreadcrumb';
 import ProgramSidebar from '../components/ProgramSidebar';
 import { 
   FaHome, 
-  FaUsers, 
   FaHeart, 
   FaHandsHelping, 
   FaGraduationCap,
-  FaChild,
   FaMapMarkerAlt,
   FaPhone,
   FaEnvelope,

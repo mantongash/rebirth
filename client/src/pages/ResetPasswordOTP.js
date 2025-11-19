@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEye, FaEyeSlash, FaLock, FaSpinner, FaCheck, FaArrowLeft, FaShieldAlt, FaExclamationTriangle, FaPhone, FaKey, FaSave, FaSms } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaLock, FaSpinner, FaCheck, FaArrowLeft, FaShieldAlt, FaExclamationTriangle, FaPhone, FaSave } from 'react-icons/fa';
 import API_MAIN from '../services/api';
 
 const ResetPasswordOTPContainer = styled.div`

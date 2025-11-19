@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaQuestionCircle, FaChevronDown, FaChevronUp, FaPhone, FaEnvelope, FaHandsHelping, FaHeart, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
+import { FaQuestionCircle, FaChevronDown, FaChevronUp, FaPhone, FaEnvelope, FaHandsHelping } from 'react-icons/fa';
 
 const Container = styled.div`
   min-height: 100vh;

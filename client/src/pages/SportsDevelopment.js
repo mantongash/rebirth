@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaFutbol, FaUsers, FaTrophy, FaHeart, FaHandshake, FaChartLine, FaStar, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaClock, FaBullseye, FaGlobe, FaMedal, FaBook, FaLaptop, FaMicrophone, FaUsersCog, FaShieldAlt, FaRocket, FaPalette, FaDumbbell, FaRunning, FaBasketballBall, FaVolleyballBall } from 'react-icons/fa';
+import { FaFutbol, FaUsers, FaTrophy, FaHeart, FaStar, FaArrowRight, FaClock, FaBullseye, FaDumbbell, FaRunning, FaBasketballBall, FaVolleyballBall } from 'react-icons/fa';
 
 const Page = styled.div`
   min-height: 100vh;

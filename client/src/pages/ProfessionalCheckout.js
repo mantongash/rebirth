@@ -7,12 +7,9 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { 
-  FaArrowLeft, 
   FaCreditCard, 
-  FaTruck, 
   FaMobile, 
   FaUniversity, 
-  FaPaypal, 
   FaLock,
   FaCheckCircle,
   FaUser,
@@ -20,10 +17,7 @@ import {
   FaPhone,
   FaEnvelope,
   FaShieldAlt,
-  FaClock,
   FaGift,
-  FaEdit,
-  FaTrash,
   FaPlus,
   FaMinus
 } from 'react-icons/fa';
@@ -511,12 +505,12 @@ const LoadingSubtext = styled.p`
 // Professional Checkout Component
 const ProfessionalCheckout = () => {
   const navigate = useNavigate();
-  const { items: cart, getCartTotal, clearCart, updateQuantity, removeFromCart } = useCart();
+  const { items: cart, getCartTotal, updateQuantity, removeFromCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const { showSuccess, showError } = useNotification();
   
   // State management
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [availableMethods, setAvailableMethods] = useState([]);
@@ -578,6 +572,7 @@ const ProfessionalCheckout = () => {
     };
     
     loadPaymentMethods();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Redirect if not authenticated

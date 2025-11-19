@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { 
-  FaUser, FaLock, FaBell, FaCog, FaSave, FaEye, FaEyeSlash,
-  FaEnvelope, FaPhone, FaGlobe, FaShieldAlt, FaPalette, FaDownload,
-  FaCheck, FaTimes, FaExclamationTriangle
+  FaUser, FaLock, FaBell, FaSave, FaEye, FaEyeSlash,
+  FaPalette, FaCheck, FaTimes, FaExclamationTriangle
 } from 'react-icons/fa';
 
 const SettingsContainer = styled.div`

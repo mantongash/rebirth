@@ -6,7 +6,6 @@ import {
   FaEnvelope, 
   FaPhone, 
   FaMapMarkerAlt,
-  FaArrowLeft,
   FaDownload,
   FaShare
 } from 'react-icons/fa';
@@ -15,14 +14,13 @@ import PaymentStatus from '../components/PaymentStatus';
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [, setPaymentStatus] = useState('pending');
   
   // Get order details from navigation state
   const orderId = location.state?.orderId || 'ORD-' + Date.now();
   const orderNumber = location.state?.orderNumber || 'ORD-' + Date.now();
   const paymentMethod = location.state?.paymentMethod || 'Unknown';
   const total = location.state?.total || 0;
-  const paymentData = location.state?.paymentData;
 
   const handleDownloadReceipt = () => {
     // Create a simple receipt

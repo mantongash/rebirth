@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useAdminAuth } from '../context/AdminAuthContext';
 import { 
   FaGraduationCap, FaPlus, FaEdit, FaTrash, FaEye, FaSave, FaTimes, 
-  FaCheck, FaUsers, FaCalendar, FaMapMarkerAlt, FaClock, FaSearch, 
-  FaFilter, FaSync, FaDownload, FaUpload, FaBook, FaHandsHelping,
-  FaHeart, FaLightbulb, FaFutbol, FaCamera, FaVideo, FaImage
+  FaUsers, FaCalendar, FaMapMarkerAlt, FaSync, FaBook, FaHandsHelping,
+  FaFutbol, FaVideo
 } from 'react-icons/fa';
 
 const Container = styled.div`
@@ -401,7 +399,6 @@ const EmptyState = styled.div`
 `;
 
 const AdminPrograms = () => {
-  const { getAdminToken } = useAdminAuth();
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -502,6 +499,7 @@ const AdminPrograms = () => {
 
   useEffect(() => {
     fetchPrograms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPrograms = async () => {

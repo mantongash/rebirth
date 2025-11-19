@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaBook, FaHandsHelping, FaFutbol, FaLightbulb, FaQuoteLeft, FaQuoteRight, FaBullseye, FaEye, FaFlagCheckered, FaHandshake, FaDonate, FaArrowRight, FaArrowUp, FaChevronLeft, FaChevronRight, FaEnvelope, FaCalendarAlt, FaClock, FaUserFriends, FaGift, FaChartLine, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { FaHeart, FaUsers, FaGraduationCap, FaStar, FaHandsHelping, FaQuoteLeft, FaQuoteRight, FaBullseye, FaEye, FaFlagCheckered, FaHandshake, FaDonate, FaArrowRight, FaArrowUp, FaChevronLeft, FaChevronRight, FaEnvelope, FaCalendarAlt, FaClock, FaUserFriends, FaGift, FaChartLine, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
 // import Chatbot from '../components/Chatbot';

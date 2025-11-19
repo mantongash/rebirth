@@ -34,6 +34,17 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
+  const loadRelatedProducts = React.useCallback(async (category) => {
+    try {
+      const { data } = await API_MAIN.get(`/shop/products?category=${category}&limit=4`);
+      if (data?.success && data.data) {
+        setRelatedProducts(data.data.filter(p => p._id !== productId));
+      }
+    } catch (e) {
+      console.error('Error loading related products:', e);
+    }
+  }, [productId]);
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -54,18 +65,7 @@ const ProductDetail = () => {
       }
     };
     if (productId) loadProduct();
-  }, [productId, navigate]);
-
-  const loadRelatedProducts = async (category) => {
-    try {
-      const { data } = await API_MAIN.get(`/shop/products?category=${category}&limit=4`);
-      if (data?.success && data.data) {
-        setRelatedProducts(data.data.filter(p => p._id !== productId));
-      }
-    } catch (e) {
-      console.error('Error loading related products:', e);
-    }
-  };
+  }, [productId, navigate, loadRelatedProducts]);
 
   const handleQuantityChange = (newQuantity) => {
     const stockLeft = typeof product?.stock === 'number' ? product.stock : product?.stockCount;

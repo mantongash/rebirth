@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
-  FaHandshake, 
   FaHeart, 
   FaGraduationCap, 
   FaUsers, 
   FaGlobe, 
   FaBuilding,
-  FaStar,
-  FaQuoteLeft,
   FaArrowRight,
-  FaExternalLinkAlt,
-  FaCalendarAlt,
-  FaMapMarkerAlt
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 
 const Page = styled.div`

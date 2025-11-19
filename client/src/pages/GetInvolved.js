@@ -10,14 +10,12 @@ import {
   FaHandshake, 
   FaCalendarAlt,
   FaArrowRight,
-  FaDollarSign,
   FaClock,
   FaMapMarkerAlt,
   FaEnvelope,
   FaPhone,
   FaStar,
   FaGift,
-  FaHandHoldingHeart,
   FaLightbulb,
   FaRocket
 } from 'react-icons/fa';
@@ -57,12 +55,6 @@ const GetInvolved = () => {
     { number: 95, label: 'Satisfaction Rate', icon: FaStar }
   ];
 
-  const donationStats = [
-    { number: 1000, label: 'Donors', icon: FaHeart },
-    { number: 5000000, label: 'KES Raised', icon: FaDollarSign },
-    { number: 50, label: 'Projects Funded', icon: FaRocket },
-    { number: 100, label: 'Lives Changed', icon: FaHandHoldingHeart }
-  ];
 
   const volunteerOpportunities = [
     {

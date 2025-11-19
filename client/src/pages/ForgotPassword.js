@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEnvelope, FaPhone, FaSpinner, FaCheck, FaArrowLeft, FaShieldAlt, FaPaperPlane, FaSms, FaUserSecret } from 'react-icons/fa';
+import { FaEnvelope, FaPhone, FaSpinner, FaCheck, FaArrowLeft, FaShieldAlt, FaPaperPlane, FaSms } from 'react-icons/fa';
 import API_MAIN from '../services/api';
 
 const ForgotPasswordContainer = styled.div`

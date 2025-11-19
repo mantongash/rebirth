@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaSearch, 
-  FaFilter, 
   FaEye, 
   FaDownload, 
   FaShoppingBag,
@@ -69,6 +68,7 @@ const OrderHistory = () => {
       setOrders(mockOrders);
       setLoading(false);
     }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getStatusIcon = (status) => {

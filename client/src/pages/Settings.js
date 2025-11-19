@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaLock, FaBell, FaEnvelope, FaShieldAlt, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaLock, FaBell, FaShieldAlt, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

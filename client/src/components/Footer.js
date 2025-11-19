@@ -6,7 +6,8 @@ import { FaYoutube } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const bgUrl = process.env.REACT_APP_CLOUDINARY_FOOTER_BG_URL || (process.env.PUBLIC_URL + '/images/branding/footer-bg.jpg');
+const bgUrl = process.env.REACT_APP_CLOUDINARY_FOOTER_BG_URL;
+
 
 const FooterContainer = styled.footer`
   background: linear-gradient(135deg, 

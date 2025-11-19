@@ -275,7 +275,7 @@ router.get('/methods', (req, res) => {
         available: !!(process.env.PAYSTACK_PUBLIC_KEY && process.env.PAYSTACK_SECRET_KEY),
         supported: true,
         configured: !!(process.env.PAYSTACK_PUBLIC_KEY && process.env.PAYSTACK_SECRET_KEY),
-        currency: 'NGN',
+        currency: process.env.PAYSTACK_CURRENCY || 'KES',
         requiresEmail: true,
         requiresPhone: false
       },
@@ -314,7 +314,7 @@ router.get('/methods', (req, res) => {
         available: true,
         supported: true,
         configured: true,
-        currency: 'NGN',
+        currency: process.env.PAYSTACK_CURRENCY || 'KES',
         requiresEmail: false,
         requiresPhone: false
       }
@@ -372,9 +372,11 @@ router.post('/initialize', async (req, res) => {
 
     // Create donation record first
     const Donation = require('../models/Donation');
+    // Get currency from environment or request, default to KES for Kenyan operations
+    const defaultCurrency = process.env.PAYSTACK_CURRENCY || 'KES';
     const donation = new Donation({
       amount: parseFloat(amount),
-      currency: currency || 'NGN',
+      currency: currency || defaultCurrency,
       donorName: `${firstName || 'Anonymous'} ${lastName || 'Donor'}`,
       donorEmail: email || 'anonymous@donor.com',
       donorPhone: phone || '',
@@ -431,7 +433,9 @@ async function initializePaystackPayment(req, res, donation) {
     }
 
     const paystack = require('paystack')(process.env.PAYSTACK_SECRET_KEY);
-    const { email, firstName, lastName, phone, amount, currency = 'NGN' } = req.body;
+    // Get currency from environment or request, default to KES for Kenyan operations
+    const defaultCurrency = process.env.PAYSTACK_CURRENCY || 'KES';
+    const { email, firstName, lastName, phone, amount, currency = defaultCurrency } = req.body;
 
     if (!email) {
       return res.status(400).json({

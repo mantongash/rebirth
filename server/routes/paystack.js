@@ -20,7 +20,9 @@ router.post('/initialize', async (req, res) => {
       });
     }
 
-    const { amount, email, firstName, lastName, phone, currency = 'NGN' } = req.body;
+    // Get currency from environment or request, default to KES for Kenyan operations
+    const defaultCurrency = process.env.PAYSTACK_CURRENCY || 'KES';
+    const { amount, email, firstName, lastName, phone, currency = defaultCurrency } = req.body;
 
     // Validate required fields
     if (!amount || amount < 1) {
@@ -189,11 +191,14 @@ router.get('/config', (req, res) => {
     });
   }
 
+  // Get currency from environment variable, default to KES for Kenyan operations
+  const defaultCurrency = process.env.PAYSTACK_CURRENCY || 'KES';
+  
   res.json({
     success: true,
     data: {
       publicKey: process.env.PAYSTACK_PUBLIC_KEY,
-      currency: 'NGN',
+      currency: defaultCurrency,
       supportedCurrencies: ['NGN', 'GHS', 'ZAR', 'KES', 'USD'],
       supportedChannels: [
         'card',
@@ -202,7 +207,8 @@ router.get('/config', (req, res) => {
         'qr',
         'mobile_money',
         'bank_transfer'
-      ]
+      ],
+      isConfigured: true
     }
   });
 });

@@ -35,11 +35,15 @@ router.post('/orders/initialize', authenticateToken, async (req, res) => {
 
     const paystack = require('paystack')(process.env.PAYSTACK_SECRET_KEY);
 
+    // Get currency from environment or order, default to KES for Kenyan operations
+    const defaultCurrency = process.env.PAYSTACK_CURRENCY || 'KES';
+    const orderCurrency = order.currency || defaultCurrency;
+    
     const reference = `order_${order._id}_${Date.now()}`;
     const paymentData = {
-      amount: Math.round(order.total * 100),
+      amount: Math.round(order.total * 100), // Convert to smallest currency unit (kobo for NGN, cents for KES)
       email: order.customer.email,
-      currency: order.currency === 'KES' ? 'NGN' : order.currency || 'NGN',
+      currency: orderCurrency,
       reference,
       metadata: {
         orderId: order._id.toString(),

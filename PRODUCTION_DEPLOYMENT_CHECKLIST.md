@@ -69,6 +69,7 @@ MPESA_ENVIRONMENT=live
 # Paystack Configuration
 PAYSTACK_SECRET_KEY=your_paystack_secret_key
 PAYSTACK_PUBLIC_KEY=your_paystack_public_key
+PAYSTACK_CURRENCY=KES  # Options: KES, NGN, GHS, ZAR, USD (defaults to KES)
 
 # Email Configuration
 EMAIL_HOST=smtp.gmail.com

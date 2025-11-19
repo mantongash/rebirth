@@ -355,13 +355,17 @@ const Donate = () => {
   const getCurrencySymbol = (methodId) => {
     switch (methodId) {
       case 'paystack':
-        return paystackConfig?.currency === 'USD' ? '$' : '₦';
+        if (paystackConfig?.currency === 'USD') return '$';
+        if (paystackConfig?.currency === 'KES') return 'KSh';
+        if (paystackConfig?.currency === 'GHS') return '₵';
+        if (paystackConfig?.currency === 'ZAR') return 'R';
+        return '₦'; // Default to NGN
       case 'paypal':
         return '$';
       case 'mpesa':
         return 'KSh';
       default:
-        return '₦';
+        return 'KSh'; // Default to Kenyan Shilling
     }
   };
 
@@ -403,7 +407,7 @@ const Donate = () => {
           firstName: firstName,
           lastName: lastName,
           phone: phone,
-          currency: currentMethod?.currency || 'NGN'
+          currency: currentMethod?.currency || paystackConfig?.currency || 'KES'
         })
       });
 

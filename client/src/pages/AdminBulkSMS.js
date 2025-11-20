@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -442,18 +443,18 @@ const StatusBadge = styled.span`
   `}
 `;
 
-const ActionButton = styled.button`
-  background: none;
-  border: none;
-  color: #667eea;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
+// const ActionButton = styled.button`
+//   background: none;
+//   border: none;
+//   color: #667eea;
+//   cursor: pointer;
+//   padding: 0.25rem;
+//   border-radius: 0.25rem;
   
-  &:hover {
-    background: #edf2f7;
-  }
-`;
+//   &:hover {
+//     background: #edf2f7;
+//   }
+// `;
 
 const AdminBulkSMS = () => {
   const [formData, setFormData] = useState({

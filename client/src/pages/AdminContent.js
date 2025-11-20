@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { 
-  FaEdit, FaPlus, FaTrash, FaEye, FaSearch, FaFilter, 
-  FaDownload, FaSync, FaFileAlt, FaImage, FaVideo, FaLink
+  FaEdit, FaPlus, FaTrash, FaEye, 
+  FaDownload,
 } from 'react-icons/fa';
-import ApplicationDashboard from '../components/ApplicationDashboard';
 import { getApiUrl } from '../utils/apiConfig';
 
 const Container = styled.div`
@@ -137,7 +137,9 @@ export default function AdminContent() {
     archived: 0
   });
 
-  const fetchContent = async () => {
+  
+  useEffect(() => {
+    const fetchContent = async () => {
     try {
       setLoading(true);
       const token = getAdminToken();
@@ -162,7 +164,6 @@ export default function AdminContent() {
     }
   };
 
-  useEffect(() => {
     fetchContent();
   }, []);
 

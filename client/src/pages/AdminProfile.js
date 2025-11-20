@@ -24,13 +24,13 @@ const ProfileCard = styled.div`
   border: 1px solid #e2e8f0;
 `;
 
-const Avatar = styled.img`
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  margin: 0 auto 1rem;
-  display: block;
-`;
+// const Avatar = styled.img`
+//   width: 56px;
+//   height: 56px;
+//   border-radius: 50%;
+//   margin: 0 auto 1rem;
+//   display: block;
+// `;
 
 const Title = styled.h2`
   color: #26a69a;

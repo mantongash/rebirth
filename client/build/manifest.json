@@ -1,0 +1,31 @@
+{
+  "short_name": "Rebirth Queen",
+  "name": "Rebirth of a Queen - Empowering Women and Communities",
+  "description": "Non-profit organization dedicated to empowering women and communities through education, shelter, advocacy, and vocational training programs in Kenya",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://res.cloudinary.com/samokello/image/upload/v1758147536/rebirth-of-a-queen/images/logo_jwavy0.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "categories": ["non-profit", "education", "social"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

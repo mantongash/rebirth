@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { 
-  FaFileAlt, FaPlus, FaEdit, FaTrash, FaEye, FaSave, FaTimes, 
-  FaCheck, FaUsers, FaCalendar, FaMapMarkerAlt, FaClock, FaSearch, 
-  FaFilter, FaSync, FaDownload, FaUpload, FaUser, FaEnvelope, 
-  FaPhone, FaGraduationCap, FaHandsHelping, FaCheckCircle, 
+  FaFileAlt, FaEye, FaSave, FaTimes, 
+  FaCheck, FaClock, 
+   FaSync, FaDownload,  FaCheckCircle, 
   FaTimesCircle, FaExclamationTriangle
 } from 'react-icons/fa';
 

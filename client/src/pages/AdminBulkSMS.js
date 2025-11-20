@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
-  FaSms, FaUsers, FaPaperPlane, FaHistory, FaFileAlt, 
-  FaCheckCircle, FaExclamationTriangle, FaClock, FaTrash,
-  FaEdit, FaEye, FaDownload, FaUpload, FaFilter, FaSearch,
-  FaPhone, FaEnvelope, FaUser, FaCalendarAlt, FaChartBar,
-  FaArrowLeft, FaPlus, FaSave, FaTimes, FaCopy, FaShare
+  FaSms, FaUsers, FaPaperPlane, FaHistory, 
+  FaCheckCircle, FaClock, FaTrash,
+  FaDownload, FaUpload, 
+  FaPhone,
+  FaArrowLeft, FaPlus, 
 } from 'react-icons/fa';
 import SMSService from '../services/smsService';
 import { buildApiUrl } from '../utils/apiConfig';

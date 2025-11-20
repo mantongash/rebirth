@@ -2,7 +2,6 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://samokello.github.io/rebirth-of-a-queen",
   "dependencies": {
     "@paypal/react-paypal-js": "^8.8.3",
     "@testing-library/dom": "^10.4.0",

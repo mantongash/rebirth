@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaShoppingCart, FaTimes, FaMinus, FaPlus, FaCreditCard, FaWhatsapp, FaEye, FaTrash, FaCheckCircle } from 'react-icons/fa';

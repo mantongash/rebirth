@@ -82,7 +82,7 @@ app.use('/api/auth/', authLimiter);
 
 // Basic middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://rebirth-zeta.vercel.app/',
+  origin: process.env.CORS_ORIGIN || 'https://rebirth-zeta.vercel.app',
   credentials: true
 }));
 
